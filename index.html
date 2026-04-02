@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GrappleMapper</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0eeea;--surf:#fff;--bord:#e0ddd7;--bord2:#c8c5be;
+  --text:#18170f;--mut:#8a8780;--acc:#6b46c1;--al:#ede9f8;
+  --dan:#dc2626;
+  --sh:0 1px 4px rgba(0,0,0,.09),0 0 0 1px rgba(0,0,0,.04);
+  --sh2:0 6px 24px rgba(0,0,0,.13),0 0 0 1px rgba(0,0,0,.05);
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:13px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+#bar{position:fixed;top:0;left:0;right:0;height:50px;display:flex;align-items:center;gap:9px;padding:0 16px;background:rgba(255,255,255,.95);border-bottom:1px solid var(--bord);z-index:500}
+.logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6b46c1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.logo span{color:var(--acc)}
+.sep{width:1px;height:22px;background:var(--bord);flex-shrink:0}
+#ftitle{border:none;background:transparent;font-size:13px;font-weight:500;outline:none;width:180px;padding:3px 6px;border-radius:6px}
+#ftitle:hover,#ftitle:focus{background:var(--bg)}
+.btn{background:transparent;border:1px solid var(--bord);color:var(--text);padding:5px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--bg);border-color:var(--bord2)}
+.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.pri:hover{background:#5a37a8}
+.sp{flex:1}
+.zr{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mut)}
+.zr button{width:26px;height:26px;border-radius:6px;border:1px solid var(--bord);background:transparent;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.zr button:hover{background:var(--bg)}
+#zpct{min-width:38px;text-align:center;font-weight:500}
+#layout{position:fixed;top:50px;left:0;right:0;bottom:0;display:flex}
+#sb{width:264px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--bord);display:flex;flex-direction:column;overflow:hidden}
+#sb-scroll{flex:1;overflow-y:auto;padding:14px 15px}
+#sb-scroll::-webkit-scrollbar{width:3px}
+#sb-scroll::-webkit-scrollbar-thumb{background:var(--bord);border-radius:3px}
+.ss{margin-bottom:20px}
+.sl{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.09em;margin-bottom:9px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:5px 11px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;border:1.5px solid var(--bord);background:transparent;color:var(--mut);transition:all .15s}
+.chip:hover,.chip.on{border-color:var(--acc);color:var(--acc);background:var(--al)}
+.swatches{display:flex;gap:8px}
+.sw{width:21px;height:21px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .15s}
+.sw:hover{transform:scale(1.15)}
+.sw.on{border-color:var(--text)}
+.add-big{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:10px;background:#f5f3ff;border:1.5px dashed var(--acc);color:var(--acc);cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .15s}
+.add-big:hover{background:var(--al)}
+.howto{font-size:11px;color:var(--mut);line-height:1.9}
+.howto li{list-style:none;padding-left:14px;position:relative}
+.howto li::before{content:'·';position:absolute;left:0;color:var(--acc)}
+#detail{border-top:1px solid var(--bord);padding:14px 15px;display:none}
+#detail.on{display:block}
+.dph{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dpt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--acc)}
+.field{margin-bottom:9px}
+.field label{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:3px}
+.field input,.field textarea,.field select{width:100%;padding:7px 10px;border:1px solid var(--bord);border-radius:8px;font-family:inherit;font-size:12px;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s}
+.field input:focus,.field textarea:focus{border-color:var(--acc)}
+.field textarea{resize:vertical;min-height:52px}
+#vpreview{width:100%;aspect-ratio:16/9;border-radius:8px;background:#111 center/cover;margin-bottom:10px;display:none;cursor:pointer}
+#name-suggestions{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px}
+.nchip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;background:var(--al);color:var(--acc);border:1px solid var(--acc);cursor:pointer;transition:all .15s}
+.nchip:hover{background:var(--acc);color:#fff}
+.nchip.loading{background:var(--bg);color:var(--mut);border-color:var(--bord);cursor:default;animation:pulse .9s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+#wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+#dotbg{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#c0bdb6 1.2px,transparent 1.2px);background-size:24px 24px;opacity:.5}
+#canvas{position:absolute;top:0;left:0;transform-origin:0 0}
+.node{position:absolute;width:190px;background:var(--surf);border:1.5px solid var(--bord);border-radius:12px;box-shadow:var(--sh);cursor:pointer;user-select:none;transition:border-color .15s,box-shadow .15s}
+.node:hover{border-color:var(--bord2);box-shadow:var(--sh2)}
+.node.armed{border-color:var(--acc)!important;box-shadow:0 0 0 3px var(--al),var(--sh2)!important;cursor:crosshair}
+.node.tgt{border-color:#06b6d4!important;box-shadow:0 0 0 3px rgba(6,182,212,.2)!important}
+.node.sel{border-color:var(--acc);box-shadow:0 0 0 3px var(--al),var(--sh2)}
+.node.msel{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,.18),var(--sh2)}
+/* Position nodes are pill-shaped but same width */
+.node.pos-node{border-radius:60px;text-align:center}
+.node.pos-node .ninner{border-radius:58px}
+.node.pos-node .nbody{padding:18px 16px}
+.node.pos-node .ntag{display:none}
+.node.pos-node .ntitle{font-size:12px;font-weight:700}
+.node.pos-node .ndesc{display:none}
+.ninner{border-radius:11px;overflow:hidden}
+.nbar{height:4px}
+.nph{width:100%;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bg);font-size:11px;color:var(--mut)}
+.nph span{font-size:22px;opacity:.4}
+.nvthumb{width:100%;aspect-ratio:16/9;background:center/cover #111;position:relative;cursor:pointer}
+.nvthumb::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.2)}
+.nvplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none}
+.nvplay svg{width:12px;height:12px;fill:var(--acc);margin-left:2px}
+.nvframe{width:100%;aspect-ratio:16/9;position:relative;background:#000}
+.nvframe iframe{width:100%;height:100%;border:none;display:block}
+.nvframe .nvstop{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1}
+.nvframe .nvstop:hover{background:rgba(0,0,0,.9)}
+.nvframe .nvopen{position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1;text-decoration:none}
+.nvframe .nvopen:hover{background:var(--acc)}
+.nbody{padding:8px 10px 10px}
+.ntag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.03em;margin-bottom:5px}
+.ntitle{font-size:12px;font-weight:600;line-height:1.35;margin-bottom:3px}
+.ndesc{font-size:11px;color:var(--mut);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.delbtn{position:absolute;top:-8px;left:-8px;width:18px;height:18px;border-radius:50%;background:var(--surf);border:1px solid var(--bord);color:var(--mut);cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center;z-index:10;line-height:1}
+.node:hover .delbtn,.node.sel .delbtn,.node.msel .delbtn{display:flex}
+.delbtn:hover{background:var(--dan);border-color:var(--dan);color:#fff}
+#marquee{position:absolute;border:1.5px dashed var(--acc);background:rgba(107,70,193,.06);border-radius:3px;display:none;pointer-events:none;z-index:200}
+#badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;display:none;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
+#cstatus{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;display:none;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
+#hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid var(--bord);padding:7px 18px;border-radius:22px;font-size:11px;color:var(--mut);pointer-events:none;white-space:nowrap;box-shadow:var(--sh);transition:opacity .4s}
+#arrow-label-editor{position:absolute;display:none;z-index:600}
+#arrow-label-editor input{border:1.5px solid var(--acc);border-radius:6px;padding:4px 8px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#fff;color:#555;outline:none;width:140px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+</style>
+</head>
+<body>
+<div id="bar">
+  <div class="logo"><div class="logo-mark">&#x2B21;</div>Grapple<span>Mapper</span></div>
+  <div class="sep"></div>
+  <input id="ftitle" value="My BJJ System" spellcheck="false">
+  <div class="sep"></div>
+  <button class="btn" onclick="loadTmpl('guard')">Guard passing</button>
+  <button class="btn" onclick="loadTmpl('half')">Half guard</button>
+  <button class="btn" onclick="loadTmpl('mount')">Mount attacks</button>
+  <div class="sp"></div>
+  <button class="btn" onclick="clearAll()" style="color:var(--dan)">Clear</button>
+  <button class="btn pri" onclick="addNodeCenter()">+ Add</button>
+  <div class="sep"></div>
+  <div class="zr">
+    <button onclick="zBy(-.12)">&#8722;</button>
+    <span id="zpct">100%</span>
+    <button onclick="zBy(.12)">+</button>
+    <button onclick="fitView()" style="font-size:11px;width:auto;padding:0 8px">fit</button>
+  </div>
+</div>
+<div id="layout">
+  <div id="sb">
+    <div id="sb-scroll">
+      <div class="ss">
+        <div class="sl">Type</div>
+        <div class="chips">
+          <button class="chip on" onclick="setType('position',this)">Position</button>
+          <button class="chip" onclick="setType('sweep',this)">Sweep</button>
+          <button class="chip" onclick="setType('submission',this)">Submission</button>
+          <button class="chip" onclick="setType('pass',this)">Pass</button>
+          <button class="chip" onclick="setType('escape',this)">Escape</button>
+          <button class="chip" onclick="setType('takedown',this)">Takedown</button>
+        </div>
+      </div>
+      <div class="ss">
+        <div class="sl">Belt colors</div>
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--mut)">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:8px;border-radius:4px;background:#e8e8e8;border:1px solid #ccc"></div>White — Position</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:8px;border-radius:4px;background:#1a4fa3"></div>Blue — Pass</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:8px;border-radius:4px;background:#7c4fcf"></div>Purple — Sweep</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:8px;border-radius:4px;background:#6b3f1f"></div>Brown — Escape</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:8px;border-radius:4px;background:#c17f2e"></div>Yellow — Takedown</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:8px;border-radius:4px;background:#1a1a1a"></div>Black — Submission</div>
+        </div>
+      </div>
+      <div class="ss">
+        <button class="add-big" onclick="addNodeCenter()"><span style="font-size:18px">+</span> Add technique</button>
+      </div>
+      <div class="ss">
+        <div class="sl">Templates</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn" style="text-align:left" onclick="loadTmpl('guard')">&#x1F4CB; Guard passing</button>
+          <button class="btn" style="text-align:left" onclick="loadTmpl('half')">&#x1F4CB; Half guard</button>
+          <button class="btn" style="text-align:left" onclick="loadTmpl('mount')">&#x1F4CB; Mount attacks</button>
+        </div>
+      </div>
+      <div class="ss">
+        <div class="sl">How to use</div>
+        <ul class="howto">
+          <li><b>Click</b> a node &#8594; turns purple (armed)</li>
+          <li><b>Click another node</b> &#8594; arrow drawn</li>
+          <li><b>Esc</b> or click armed node &#8594; cancel</li>
+          <li><b>Drag</b> node &#8594; move it</li>
+          <li><b>Double-click</b> node &#8594; edit details</li>
+          <li><b>Double-click</b> canvas &#8594; add node</li>
+          <li><b>Drag</b> canvas &#8594; marquee select</li>
+          <li><b>Del / Backspace</b> &#8594; delete selected</li>
+          <li><b>Click arrow</b> &#8594; delete connection</li>
+          <li><b>Double-click arrow</b> &#8594; add/edit label</li>
+        </ul>
+      </div>
+    </div>
+    <div id="detail">
+      <div class="dph"><span class="dpt">Edit technique</span>
+        <button class="btn" style="padding:3px 9px;font-size:11px;color:var(--dan)" onclick="delSelected()">Delete</button>
+      </div>
+      <div id="vpreview"></div>
+      <div class="field"><label>Title</label>
+        <input id="dp-t" placeholder="e.g. Knee cut pass" oninput="updN('label',this.value)">
+        <div id="name-suggestions"></div>
+      </div>
+      <div class="field"><label>Video URL (YouTube / Instagram / Facebook)</label>
+        <input id="dp-u" placeholder="https://youtube.com/watch?v=..." oninput="onUrl(this.value)">
+      </div>
+      <div class="field"><label>Description</label>
+        <textarea id="dp-d" placeholder="Notes..." oninput="updN('desc',this.value)"></textarea>
+      </div>
+      <div class="field"><label>Type</label>
+        <select id="dp-ty" onchange="updType(this.value)">
+          <option value="position">Position</option><option value="sweep">Sweep</option>
+          <option value="submission">Submission</option><option value="pass">Pass</option>
+          <option value="escape">Escape</option><option value="takedown">Takedown</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="wrap">
+    <div id="dotbg"></div>
+    <div id="canvas">
+      <svg id="asvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none" width="1" height="1">
+        <defs>
+          <marker id="ah" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#b39ddb"/>
+          </marker>
+        </defs>
+        <path id="pline" fill="none" stroke="#9c7fcc" stroke-width="2" stroke-dasharray="8,5" style="display:none"/>
+      </svg>
+    </div>
+    <div id="marquee"></div>
+    <div id="badge"></div>
+    <div id="cstatus"></div>
+    <div id="arrow-label-editor"><input id="ale-input" placeholder="label..." /></div>
+    <div id="hint">Click a node to arm it &middot; click another to connect &middot; drag canvas to pan</div>
+  </div>
+</div>
+<script>
+const META={
+  position:  {label:'Position',  color:'#e8e8e8',bg:'#f5f5f5',textColor:'#444',icon:'&#x1F94B;'},
+  sweep:     {label:'Sweep',     color:'#7c4fcf',bg:'#ede9f8',textColor:'#4a2d8a',icon:'&#x1F504;'},
+  submission:{label:'Submission',color:'#1a1a1a',bg:'#2d2d2d',textColor:'#f0f0f0',icon:'&#x1F512;'},
+  pass:      {label:'Pass',      color:'#1a4fa3',bg:'#dbeafe',textColor:'#1e3a7a',icon:'&#x25B6;'},
+  escape:    {label:'Escape',    color:'#6b3f1f',bg:'#f5e6d8',textColor:'#4a2a10',icon:'&#x1F4A8;'},
+  takedown:  {label:'Takedown',  color:'#c17f2e',bg:'#fef3e2',textColor:'#7a4f18',icon:'&#x2B07;'},
+};
+const SAMPLES={
+  position:  ['Closed guard','Half guard','Side control','Mount','Back mount','Open guard','Turtle','X-guard','De La Riva','Butterfly guard'],
+  sweep:     ['Scissor sweep','Flower sweep','Hip bump','Sit-up sweep','Pendulum sweep'],
+  submission:['Armbar','Triangle','Kimura','Rear naked choke','Guillotine','Heel hook','Americana','Omoplata'],
+  pass:      ['Knee slice','Torreando','Leg drag','Smash pass','Double under','Bullfighter'],
+  escape:    ['Shrimp out','Bridge and roll','Hip escape','Granby roll'],
+  takedown:  ['Double leg','Single leg','Ankle pick','Hip toss'],
+};
+
+let nodes={}, arrows=[], nid=0, aid=0;
+let sc=1, px=60, py=50;
+let armed=null;
+let selId=null, msel=new Set();
+let dragId=null, dragOff={x:0,y:0}, dragging=false;
+let mqOn=false, mqSt=null;
+let curType='position', curColor='#6b46c1', curBg='#ede9f8';
+let urlTimer=null;
+
+const wrap=document.getElementById('wrap');
+const canvas=document.getElementById('canvas');
+const asvg=document.getElementById('asvg');
+const pline=document.getElementById('pline');
+const cstatus=document.getElementById('cstatus');
+
+function parseYT(url){
+  if(!url) return null;
+  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+
+function applyT(){
+  canvas.style.transform='translate('+px+'px,'+py+'px) scale('+sc+')';
+  document.getElementById('zpct').textContent=Math.round(sc*100)+'%';
+  redrawArrows();
+}
+wrap.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var r=wrap.getBoundingClientRect();
+  var mx=e.clientX-r.left, my=e.clientY-r.top;
+  var d=e.deltaY<0?1.1:.91;
+  var ns=Math.min(3,Math.max(.12,sc*d));
+  px=mx-(mx-px)*(ns/sc); py=my-(my-py)*(ns/sc);
+  sc=ns; applyT();
+},{passive:false});
+function zBy(d){sc=Math.min(3,Math.max(.12,sc+d));applyT();}
+function fitView(){
+  var ns=Object.values(nodes); if(!ns.length){sc=1;px=60;py=50;applyT();return;}
+  var minX=Math.min.apply(null,ns.map(function(n){return n.x;}))-40;
+  var minY=Math.min.apply(null,ns.map(function(n){return n.y;}))-40;
+  var maxX=Math.max.apply(null,ns.map(function(n){return n.x+190;}))+40;
+  var maxY=Math.max.apply(null,ns.map(function(n){return n.y+(n.h||120);}))+40;
+  var r=wrap.getBoundingClientRect();
+  sc=Math.min(2,Math.max(.12,Math.min(r.width/(maxX-minX),r.height/(maxY-minY))));
+  px=(r.width-(maxX+minX)*sc)/2; py=(r.height-(maxY+minY)*sc)/2;
+  applyT();
+}
+function toC(cx,cy){var r=wrap.getBoundingClientRect();return{x:(cx-r.left-px)/sc,y:(cy-r.top-py)/sc};}
+
+// Canvas background events
+wrap.addEventListener('mousedown',function(e){
+  if(e.target.closest && e.target.closest('.node')) return; // handled by node
+  if(armed){disarm();return;}
+  var bg=e.target===wrap||e.target===canvas||e.target.id==='dotbg'||e.target===asvg||e.target.tagName==='svg';
+  if(!bg) return;
+  var c=toC(e.clientX,e.clientY);
+  mqSt={x:c.x,y:c.y}; mqOn=true;
+  clearMsel(); desel(); e.preventDefault();
+});
+wrap.addEventListener('dblclick',function(e){
+  var bg=e.target===wrap||e.target===canvas||e.target.id==='dotbg';
+  if(bg){var c=toC(e.clientX,e.clientY);addNode(c.x-95,c.y-55);hideHint();}
+});
+window.addEventListener('mousemove',function(e){
+  if(dragId){
+    var c=toC(e.clientX,e.clientY);
+    var nx=c.x-dragOff.x, ny=c.y-dragOff.y;
+    if(!dragging && Math.hypot(nx-nodes[dragId].x,ny-nodes[dragId].y)>4) dragging=true;
+    if(dragging){
+      if(msel.size>1&&msel.has(dragId)){
+        var dx=nx-nodes[dragId].x, dy=ny-nodes[dragId].y;
+        msel.forEach(function(id){
+          nodes[id].x+=dx; nodes[id].y+=dy;
+          var el=document.getElementById(id);
+          if(el){el.style.left=nodes[id].x+'px';el.style.top=nodes[id].y+'px';}
+        });
+      } else {
+        nodes[dragId].x=nx; nodes[dragId].y=ny;
+        var el=document.getElementById(dragId);
+        if(el){el.style.left=nx+'px';el.style.top=ny+'px';}
+      }
+      redrawArrows();
+    }
+    return;
+  }
+  if(armed && nodes[armed]){
+    var c=toC(e.clientX,e.clientY);
+    var n=nodes[armed];
+    var sx=n.x+95, sy=n.y+(n.h||120)/2;
+    var dx=c.x-sx, dy=c.y-sy, pull=Math.min(80,Math.abs(dy)*.4);
+    var d;
+    if(Math.abs(dy)>=Math.abs(dx)) d='M'+sx+','+sy+' C'+sx+','+(sy+pull)+' '+c.x+','+(c.y-pull)+' '+c.x+','+c.y;
+    else{var cx=(sx+c.x)/2;d='M'+sx+','+sy+' C'+cx+','+sy+' '+cx+','+c.y+' '+c.x+','+c.y;}
+    pline.setAttribute('d',d);
+    pline.style.display='';
+    Object.keys(nodes).forEach(function(id){
+      document.getElementById(id).classList.toggle('tgt',id!==armed);
+    });
+    return;
+  }
+  if(mqOn&&mqSt){
+    var c=toC(e.clientX,e.clientY);
+    var mx=Math.min(mqSt.x,c.x), my=Math.min(mqSt.y,c.y);
+    var mw=Math.abs(c.x-mqSt.x), mh=Math.abs(c.y-mqSt.y);
+    if(mw>5||mh>5){
+      var r=wrap.getBoundingClientRect();
+      var mq=document.getElementById('marquee');
+      mq.style.cssText='display:block;left:'+(mx*sc+px)+'px;top:'+(my*sc+py)+'px;width:'+(mw*sc)+'px;height:'+(mh*sc)+'px';
+      Object.keys(nodes).forEach(function(id){
+        var n=nodes[id];
+        var inside=n.x+190>mx&&n.x<mx+mw&&n.y+(n.h||120)>my&&n.y<my+mh;
+        document.getElementById(id).classList.toggle('msel',inside);
+      });
+    }
+  }
+});
+window.addEventListener('mouseup',function(e){
+  if(dragId){dragId=null;dragging=false;}
+  if(mqOn){
+    document.getElementById('marquee').style.display='none';
+    msel.clear();
+    Object.keys(nodes).forEach(function(id){if(document.getElementById(id).classList.contains('msel'))msel.add(id);});
+    if(msel.size===1){var id=[...msel][0];msel.clear();document.getElementById(id).classList.remove('msel');selNode(id);}
+    else if(msel.size>1){var b=document.getElementById('badge');b.textContent=msel.size+' selected - Del to delete';b.style.display='block';desel();}
+    mqOn=false;mqSt=null;
+  }
+});
+window.addEventListener('keydown',function(e){
+  if(e.key==='Escape') disarm();
+  if((e.key==='Delete'||e.key==='Backspace')&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+    e.preventDefault();
+    if(msel.size>0){[...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
+    else if(selId) delNode(selId);
+  }
+});
+
+// Arrow label editor
+var aleArrowId=null;
+var aleInput=document.getElementById('ale-input');
+var aleDiv=document.getElementById('arrow-label-editor');
+function openALE(arrowId, screenX, screenY){
+  aleArrowId=arrowId;
+  var a=arrows.find(function(x){return x.id===arrowId;});
+  aleInput.value=a?a.label||''  :'';
+  aleDiv.style.display='block';
+  aleDiv.style.left=(screenX-70)+'px';
+  aleDiv.style.top=(screenY-16)+'px';
+  setTimeout(function(){aleInput.focus();aleInput.select();},30);
+}
+function closeALE(save){
+  if(save&&aleArrowId){
+    var a=arrows.find(function(x){return x.id===aleArrowId;});
+    if(a){ a.label=aleInput.value; updateArrowLabel(a); }
+  }
+  aleDiv.style.display='none'; aleArrowId=null;
+}
+aleInput.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();closeALE(true);}
+  if(e.key==='Escape'){closeALE(false);}
+  e.stopPropagation();
+});
+aleInput.addEventListener('blur',function(){closeALE(true);});
+
+function updateArrowLabel(a){
+  var g=document.getElementById(a.id); if(!g) return;
+  var txt=g.querySelector('text');
+  var bg=g.querySelector('rect.albl');
+  if(txt) txt.textContent=a.label||'';
+  // reposition
+  posArrow(a);
+}
+
+// Arrows
+function edgePts(id){
+  var n=nodes[id]; if(!n) return null;
+  var h=n.h||120;
+  return{r:{x:n.x+190,y:n.y+h/2},l:{x:n.x,y:n.y+h/2},b:{x:n.x+95,y:n.y+h},t:{x:n.x+95,y:n.y}};
+}
+function pathD(x1,y1,x2,y2){
+  var dx=Math.abs(x2-x1),dy=Math.abs(y2-y1);
+  if(dy>=dx){var pull=Math.min(80,dy*.4);return 'M'+x1+','+y1+' C'+x1+','+(y1+pull)+' '+x2+','+(y2-pull)+' '+x2+','+y2;}
+  var cx=(x1+x2)/2;return 'M'+x1+','+y1+' C'+cx+','+y1+' '+cx+','+y2+' '+x2+','+y2;
+}
+function addArrow(from,to,label){
+  label=label||'';
+  if(arrows.find(function(a){return a.from===from&&a.to===to;})) return;
+  var id='a'+(++aid);
+  var a={id:id,from:from,to:to,label:label};
+  arrows.push(a);
+  var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.id=id; g.style.cursor='pointer';
+
+  var hit=document.createElementNS('http://www.w3.org/2000/svg','path');
+  hit.setAttribute('fill','none');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','16');
+
+  var line=document.createElementNS('http://www.w3.org/2000/svg','path');
+  line.setAttribute('fill','none');line.setAttribute('stroke','#b39ddb');line.setAttribute('stroke-width','2');
+  line.setAttribute('marker-end','url(#ah)');
+
+  // Label background pill
+  var lbg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  lbg.setAttribute('class','albl');
+  lbg.setAttribute('rx','5');lbg.setAttribute('ry','5');
+  lbg.setAttribute('fill','#f5f3ff');lbg.setAttribute('stroke','#c4b5f8');lbg.setAttribute('stroke-width','1');
+
+  // Label text
+  var txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('text-anchor','middle');txt.setAttribute('dominant-baseline','middle');
+  txt.setAttribute('font-style','italic');txt.setAttribute('font-size','11');
+  txt.setAttribute('fill','#7c5cbf');txt.setAttribute('font-family','Inter,sans-serif');
+  txt.textContent=label;
+
+  g.appendChild(hit);g.appendChild(line);g.appendChild(lbg);g.appendChild(txt);
+
+  // Single click = delete (with short delay to let dblclick cancel it)
+  var clickTimer=null;
+  g.addEventListener('click',function(e){
+    e.stopPropagation();
+    clickTimer=setTimeout(function(){
+      arrows=arrows.filter(function(x){return x.id!==id;});
+      g.remove();
+    },220);
+  });
+  // Double-click = edit label (cancels the delete timer)
+  g.addEventListener('dblclick',function(e){
+    clearTimeout(clickTimer);
+    e.stopPropagation();
+    var r=wrap.getBoundingClientRect();
+    var mx=parseFloat(txt.getAttribute('x'))*sc+px+r.left;
+    var my=parseFloat(txt.getAttribute('y'))*sc+py+r.top;
+    openALE(id, mx, my);
+  });
+  g.addEventListener('mouseenter',function(){line.setAttribute('stroke','#6b46c1');lbg.setAttribute('stroke','#6b46c1');});
+  g.addEventListener('mouseleave',function(){line.setAttribute('stroke','#b39ddb');lbg.setAttribute('stroke','#c4b5f8');});
+
+  asvg.insertBefore(g,pline);
+  posArrow(a);
+}
+function posArrow(a){
+  var g=document.getElementById(a.id); if(!g) return;
+  var fn=nodes[a.from],tn=nodes[a.to]; if(!fn||!tn) return;
+  var fh=fn.h||120, th=tn.h||120;
+  var fdx=tn.x-fn.x, fdy=tn.y-fn.y;
+  var fp,tp;
+  if(Math.abs(fdy)>=Math.abs(fdx)){
+    fp=fdy>0?{x:fn.x+95,y:fn.y+fh}:{x:fn.x+95,y:fn.y};
+    tp=fdy>0?{x:tn.x+95,y:tn.y}:{x:tn.x+95,y:tn.y+th};
+  } else {
+    fp=fdx>0?{x:fn.x+190,y:fn.y+fh/2}:{x:fn.x,y:fn.y+fh/2};
+    tp=fdx>0?{x:tn.x,y:tn.y+th/2}:{x:tn.x+190,y:tn.y+th/2};
+  }
+  var d=pathD(fp.x,fp.y,tp.x,tp.y);
+  g.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d);});
+  var mx=(fp.x+tp.x)/2, my=(fp.y+tp.y)/2;
+  var txt=g.querySelector('text');
+  var lbg=g.querySelector('rect.albl');
+  if(txt){
+    txt.setAttribute('x',mx); txt.setAttribute('y',my);
+    var label=a.label||'';
+    txt.textContent=label;
+    // Size and position the background pill
+    if(lbg){
+      if(label){
+        // Approximate text width
+        var tw=label.length*5.5+16;
+        var th2=18;
+        lbg.setAttribute('x',mx-tw/2); lbg.setAttribute('y',my-th2/2);
+        lbg.setAttribute('width',tw); lbg.setAttribute('height',th2);
+        lbg.setAttribute('display','');
+      } else {
+        lbg.setAttribute('display','none');
+      }
+    }
+  }
+}
+function redrawArrows(){arrows.forEach(posArrow);}
+
+// Arm/disarm
+function arm(id){
+  disarm();
+  armed=id;
+  document.getElementById(id).classList.add('armed');
+  cstatus.textContent='Armed: '+nodes[id].label+' - now click another node';
+  cstatus.style.display='block';
+}
+function disarm(){
+  if(armed) document.getElementById(armed)&&document.getElementById(armed).classList.remove('armed');
+  armed=null;
+  pline.style.display='none'; pline.setAttribute('d','');
+  cstatus.style.display='none';
+  document.querySelectorAll('.node.tgt').forEach(function(n){n.classList.remove('tgt');});
+}
+
+// Nodes
+function addNode(x,y,data){
+  data=data||{};
+  var id='n'+(++nid);
+  var t=data.type||curType;
+  var meta=META[t]||META.position;
+  nodes[id]={id:id,x:x,y:y,label:data.label||rnd(SAMPLES[t]),desc:data.desc||'',url:data.url||'',type:t,color:data.color||meta.color,bg:data.bg||meta.bg,h:120,playing:false};
+  renderNode(id);
+  return id;
+}
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function mkNodeEl(id){
+  var n=nodes[id]; var meta=META[n.type]||META.position;
+  var isPos=(n.type==='position');
+  var ytId=parseYT(n.url);
+  var el=document.createElement('div');
+  el.id=id;
+  el.className='node'+(isPos?' pos-node':'');
+  el.style.left=n.x+'px'; el.style.top=n.y+'px';
+
+  var media='';
+  if(!isPos){
+    if(n.playing && ytId){
+      // youtube-nocookie embed; if blocked on file:// the stop btn still shows
+      var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      media='<div class="nvframe"><iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+        +'<div class="nvstop" title="Stop video">&#x25A0;</div>'
+        +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a></div>';
+    } else if(ytId){
+      media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
+    } else {
+      media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
+    }
+  }
+
+  var bar=isPos?'<div class="nbar" style="background:'+n.color+';height:6px"></div>':'<div class="nbar" style="background:'+n.color+'"></div>';
+  var body='<div class="nbody"><div class="ntag" style="background:'+n.bg+';color:'+(meta.textColor||n.color)+'">'+meta.label+'</div><div class="ntitle">'+esc(n.label)+'</div>'+(n.desc&&!isPos?'<div class="ndesc">'+esc(n.desc)+'</div>':'')+'</div>';
+
+  el.innerHTML='<div class="ninner">'+bar+media+body+'</div><div class="delbtn">\xd7</div>';
+  return el;
+}
+function renderNode(id){
+  var el=mkNodeEl(id);
+  attachEv(el,id);
+  canvas.appendChild(el);
+  requestAnimationFrame(function(){nodes[id].h=el.offsetHeight||120;redrawArrows();});
+}
+function refreshNode(id){
+  var old=document.getElementById(id); if(old) old.remove();
+  renderNode(id);
+  if(selId===id) document.getElementById(id).classList.add('sel');
+  if(msel.has(id)) document.getElementById(id).classList.add('msel');
+  if(armed===id) document.getElementById(id).classList.add('armed');
+}
+function attachEv(el,id){
+  var downX=null,downY=null;
+
+  // Video play toggle — on nvthumb click play inline, on nvstop click stop
+  el.addEventListener('click',function(e){
+    var thumb=e.target.closest('.nvthumb');
+    var stop=e.target.closest('.nvstop');
+    var open=e.target.closest('.nvopen');
+    if(thumb){
+      e.stopPropagation();
+      nodes[id].playing=true; refreshNode(id); return;
+    }
+    if(stop){
+      e.stopPropagation();
+      nodes[id].playing=false; refreshNode(id); return;
+    }
+    if(open){ e.stopPropagation(); return; }
+  });
+
+  el.addEventListener('mousedown',function(e){
+    if(e.target.classList.contains('delbtn')) return;
+    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')) return;
+    e.stopPropagation();
+    downX=e.clientX; downY=e.clientY;
+    var c=toC(e.clientX,e.clientY);
+    dragOff.x=c.x-nodes[id].x; dragOff.y=c.y-nodes[id].y;
+    dragId=id; dragging=false;
+  });
+
+  el.addEventListener('mouseup',function(e){
+    if(e.target.classList.contains('delbtn')) return;
+    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')) return;
+    e.stopPropagation();
+    var wasDrag=dragging;
+    dragId=null; dragging=false;
+    if(wasDrag) return;
+    if(armed && armed!==id){
+      addArrow(armed,id);
+      disarm();
+    } else if(armed===id){
+      disarm();
+    } else {
+      arm(id);
+    }
+  });
+
+  el.addEventListener('dblclick',function(e){
+    if(e.target.classList.contains('delbtn')) return;
+    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')) return;
+    e.stopPropagation();
+    disarm();
+    selNode(id);
+  });
+
+  el.addEventListener('mouseenter',function(){if(armed&&armed!==id)el.classList.add('tgt');});
+  el.addEventListener('mouseleave',function(){el.classList.remove('tgt');});
+
+  el.querySelector('.delbtn').addEventListener('click',function(e){
+    e.stopPropagation();
+    if(msel.size>1&&msel.has(id)){[...msel].forEach(function(i){delNode(i);});msel.clear();document.getElementById('badge').style.display='none';}
+    else delNode(id);
+  });
+}
+
+function delNode(id){
+  var el=document.getElementById(id); if(el) el.remove();
+  delete nodes[id];
+  arrows=arrows.filter(function(a){
+    if(a.from===id||a.to===id){var g=document.getElementById(a.id);if(g)g.remove();return false;}
+    return true;
+  });
+  if(selId===id){selId=null;document.getElementById('detail').classList.remove('on');}
+  if(armed===id) disarm();
+  msel.delete(id);
+}
+function delSelected(){
+  if(msel.size>0){[...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
+  else if(selId) delNode(selId);
+}
+function selNode(id){
+  document.querySelectorAll('.node.sel').forEach(function(n){n.classList.remove('sel');});
+  document.getElementById(id).classList.add('sel'); selId=id;
+  openDetail(id);
+}
+function desel(){document.querySelectorAll('.node.sel').forEach(function(n){n.classList.remove('sel');});selId=null;document.getElementById('detail').classList.remove('on');}
+function clearMsel(){msel.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('msel');});msel.clear();document.getElementById('badge').style.display='none';}
+function openDetail(id){
+  var n=nodes[id]; if(!n) return;
+  document.getElementById('detail').classList.add('on');
+  document.getElementById('dp-t').value=n.label||'';
+  document.getElementById('dp-d').value=n.desc||'';
+  document.getElementById('dp-u').value=n.url||'';
+  document.getElementById('dp-ty').value=n.type||'position';
+  document.getElementById('name-suggestions').innerHTML='';
+  var ytId=parseYT(n.url);
+  var vp=document.getElementById('vpreview');
+  if(ytId){vp.style.display='block';vp.style.backgroundImage='url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')';vp.onclick=function(){window.open(n.url,'_blank');};}
+  else{vp.style.display='none';vp.onclick=null;}
+}
+function updN(field,val){
+  if(!selId) return; nodes[selId][field]=val;
+  var el=document.getElementById(selId); if(!el) return;
+  if(field==='label'){var t=el.querySelector('.ntitle');if(t)t.textContent=val;}
+  if(field==='desc'){var d=el.querySelector('.ndesc');if(d)d.textContent=val;}
+}
+function onUrl(val){
+  if(!selId) return; nodes[selId].url=val;
+  clearTimeout(urlTimer);
+  urlTimer=setTimeout(function(){refreshNode(selId);openDetail(selId);fetchSugg(val);},700);
+}
+async function fetchSugg(url){
+  var ytId=parseYT(url); if(!ytId) return;
+  var box=document.getElementById('name-suggestions');
+  box.innerHTML='<span class="nchip loading">Fetching title...</span>';
+  try{
+    var r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');
+    if(!r.ok){box.innerHTML='';return;}
+    var title=(await r.json()).title||'';
+    // Auto-apply the raw title immediately
+    if(selId&&title){
+      applyName(title);
+    }
+    // Build BJJ-specific alternative suggestions
+    var bjj=['guard','pass','sweep','armbar','triangle','kimura','choke','mount','side control','half guard','heel hook','submission','takedown','escape','back take','omoplata','guillotine','americana','ezekiel','torreando','leg drag','knee cut'];
+    var hits=[];
+    bjj.forEach(function(t){if(title.toLowerCase().includes(t)){var c=t.split(' ').map(function(w){return w[0].toUpperCase()+w.slice(1);}).join(' ');if(!hits.includes(c))hits.push(c);}});
+    // Show alternatives only (raw title already applied above)
+    if(hits.length){
+      box.innerHTML='<div style="font-size:10px;color:var(--mut);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Rename to:</div>'+hits.slice(0,5).map(function(s){return '<div class="nchip" onclick="applyName(\''+esc(s)+'\')">'+esc(s)+'</div>';}).join('');
+    } else {
+      box.innerHTML='';
+    }
+  }catch(e){box.innerHTML='';}
+}
+function applyName(name){if(!selId)return;nodes[selId].label=name;document.getElementById('dp-t').value=name;var el=document.getElementById(selId);var t=el&&el.querySelector('.ntitle');if(t)t.textContent=name;}
+function updType(val){if(!selId)return;var meta=META[val]||META.position;nodes[selId].type=val;nodes[selId].color=meta.color;nodes[selId].bg=meta.bg;refreshNode(selId);openDetail(selId);}
+function addNodeCenter(){var r=wrap.getBoundingClientRect();addNode((r.width/2-px)/sc-95+(Math.random()-.5)*40,(r.height/2-py)/sc-55+(Math.random()-.5)*30);hideHint();}
+function setType(t,el){curType=t;var m=META[t]||META.position;curColor=m.color;curBg=m.bg;document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
+function setSw(c,bg,el){curColor=c;curBg=bg;document.querySelectorAll('.sw').forEach(function(s){s.classList.remove('on');});el.classList.add('on');}
+function clearAll(){
+  if(!Object.keys(nodes).length)return;
+  if(!confirm('Clear everything?'))return;
+  Object.keys(nodes).forEach(function(id){var el=document.getElementById(id);if(el)el.remove();});
+  asvg.querySelectorAll('g').forEach(function(g){g.remove();});
+  asvg.appendChild(pline);
+  nodes={};arrows=[];nid=0;aid=0;selId=null;msel.clear();disarm();
+  document.getElementById('detail').classList.remove('on');
+  document.getElementById('badge').style.display='none';
+}
+var hintGone=false;
+function hideHint(){if(hintGone)return;hintGone=true;var h=document.getElementById('hint');if(h){h.style.opacity='0';setTimeout(function(){h.remove();},500);}}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+var TMPLS={
+  guard:{title:'Open Guard Passing System',
+    nodes:[
+      {id:'n1',x:290,y:20, type:'position',  label:'Open guard',       desc:'Opponent in seated open guard.'},
+      {id:'n2',x:60, y:210,type:'pass',       label:'Torreando pass',   desc:'Control ankles, bullfight legs to the side.'},
+      {id:'n3',x:290,y:210,type:'pass',       label:'Knee cut pass',    desc:'Slice knee through to flatten the guard.'},
+      {id:'n4',x:520,y:210,type:'pass',       label:'Leg drag',         desc:'Drag far leg, drive shoulder into hip.'},
+      {id:'n5',x:60, y:400,type:'position',   label:'Side control',     desc:'Heavy cross-face and hip pressure.'},
+      {id:'n6',x:290,y:400,type:'position',   label:'Half guard (top)', desc:'Opponent recovers half guard.'},
+      {id:'n7',x:520,y:400,type:'position',   label:'Back mount',       desc:'Seat belt grip, establish hooks.'},
+      {id:'n8',x:160,y:590,type:'position',   label:'Mount',            desc:'Walk knees up into high mount.'},
+      {id:'n9',x:390,y:590,type:'submission', label:'Armbar',           desc:'Break posture and attack the armbar.'},
+    ],
+    arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n8'],['n7','n9'],['n8','n9']],
+  },
+  half:{title:'Half Guard System',
+    nodes:[
+      {id:'n1',x:260,y:20, type:'position',   label:'Half guard',           desc:'Battle for underhook or deep half.'},
+      {id:'n2',x:40, y:210,type:'position',   label:'Deep half guard',      desc:'Dive under for better leverage.'},
+      {id:'n3',x:260,y:210,type:'sweep',      label:'Old school sweep',     desc:'Grab back of knee, sit up and shrimp.'},
+      {id:'n4',x:480,y:210,type:'submission', label:'Kimura trap',          desc:'Trap wrist in kimura grip.'},
+      {id:'n5',x:40, y:400,type:'position',   label:'Back take',            desc:'Roll toward back, establish hooks.'},
+      {id:'n6',x:260,y:400,type:'position',   label:'Top half guard',       desc:'Sweep succeeded, drive to pass.'},
+      {id:'n7',x:480,y:400,type:'submission', label:'Kimura',               desc:'Rotate shoulder, extend, finish.'},
+      {id:'n8',x:130,y:590,type:'submission', label:'Rear naked choke',     desc:'Seat belt, slide choke and squeeze.'},
+      {id:'n9',x:350,y:590,type:'pass',       label:'Pass to side control', desc:'Drive through half guard leg.'},
+    ],
+    arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n9'],['n7','n8']],
+  },
+  mount:{title:'Mount Attack Tree',
+    nodes:[
+      {id:'n1',x:250,y:20, type:'position',   label:'Low mount',          desc:'Establish base, hook the hips.'},
+      {id:'n2',x:60, y:210,type:'position',   label:'High mount',         desc:'Walk knees up to armpits.'},
+      {id:'n3',x:440,y:210,type:'position',   label:'S-mount',            desc:'Rotate to isolate arm for armbar.'},
+      {id:'n4',x:20, y:400,type:'submission', label:'Cross collar choke', desc:'Four fingers deep, drive second hand.'},
+      {id:'n5',x:200,y:400,type:'submission', label:'Ezekiel choke',      desc:'Sleeve choke using forearm.'},
+      {id:'n6',x:390,y:400,type:'submission', label:'Armbar',             desc:'Step over head, extend the elbow.'},
+      {id:'n7',x:100,y:590,type:'submission', label:'Triangle choke',     desc:'Leg over, lock triangle.'},
+      {id:'n8',x:320,y:590,type:'submission', label:'Omoplata',           desc:'Hip escape, shoulder lock.'},
+    ],
+    arrows:[['n1','n2'],['n1','n3'],['n2','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n7'],['n6','n8']],
+  },
+};
+function loadTmpl(name){
+  clearAll();
+  var T=TMPLS[name]; if(!T) return;
+  document.getElementById('ftitle').value=T.title;
+  nid=Math.max.apply(null,[0].concat(T.nodes.map(function(n){return parseInt(n.id.slice(1));})));
+  T.nodes.forEach(function(nd){
+    var meta=META[nd.type]||META.position;
+    nodes[nd.id]={id:nd.id,x:nd.x,y:nd.y,label:nd.label,desc:nd.desc||'',url:nd.url||'',type:nd.type,color:meta.color,bg:meta.bg,h:120,playing:false};
+    renderNode(nd.id);
+  });
+  setTimeout(function(){
+    T.nodes.forEach(function(nd){nodes[nd.id].h=document.getElementById(nd.id).offsetHeight||120;});
+    T.arrows.forEach(function(a){addArrow(a[0],a[1],a[2]||'');});
+    fitView();
+  },200);
+}
+
+loadTmpl('guard');
+applyT();
+</script>
+</body>
+</html>
