@@ -84,11 +84,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .nbar{height:4px}
 .nph{width:100%;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bg);font-size:11px;color:var(--mut)}
 .nph span{font-size:22px;opacity:.4}
-.nvthumb{width:100%;aspect-ratio:16/9;background:center/cover #111;position:relative;cursor:pointer}
+.nvthumb{width:calc(100% - 12px);aspect-ratio:16/9;background:center/cover #111;position:relative;cursor:pointer;margin:6px;border-radius:8px;overflow:hidden}
 .nvthumb::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.2)}
 .nvplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none}
 .nvplay svg{width:12px;height:12px;fill:var(--acc);margin-left:2px}
-.nvframe{width:100%;aspect-ratio:16/9;position:relative;background:#000}
+.nvframe{width:calc(100% - 12px);aspect-ratio:16/9;position:relative;background:#000;margin:6px;border-radius:8px;overflow:hidden}
 .nvframe iframe{width:100%;height:100%;border:none;display:block}
 .nvframe .nvstop{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1}
 .nvframe .nvstop:hover{background:rgba(0,0,0,.9)}
@@ -262,6 +262,22 @@ function parseYT(url){
   const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
   return m?m[1]:null;
 }
+function parseIG(url){
+  if(!url) return null;
+  const m=url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+  return m?m[1]:null;
+}
+// Inject Instagram embed.js once
+var igScriptLoaded=false;
+function loadIGScript(){
+  if(igScriptLoaded) return;
+  igScriptLoaded=true;
+  var s=document.createElement('script');
+  s.src='https://www.instagram.com/embed.js';
+  s.async=true;
+  s.onload=function(){ if(window.instgrm) window.instgrm.Embeds.process(); };
+  document.body.appendChild(s);
+}
 
 function applyT(){
   canvas.style.transform='translate('+px+'px,'+py+'px) scale('+sc+')';
@@ -302,6 +318,8 @@ wrap.addEventListener('mousedown',function(e){
   clearMsel(); desel(); e.preventDefault();
 });
 wrap.addEventListener('dblclick',function(e){
+  if(e.target.closest && e.target.closest('.node')) return;
+  if(e.target.closest && e.target.closest('g')) return; // clicked an arrow
   var bg=e.target===wrap||e.target===canvas||e.target.id==='dotbg';
   if(bg){var c=toC(e.clientX,e.clientY);addNode(c.x-95,c.y-55);hideHint();}
 });
@@ -550,6 +568,7 @@ function mkNodeEl(id){
   var n=nodes[id]; var meta=META[n.type]||META.position;
   var isPos=(n.type==='position');
   var ytId=parseYT(n.url);
+  var igId=parseIG(n.url);
   var el=document.createElement('div');
   el.id=id;
   el.className='node'+(isPos?' pos-node':'');
@@ -557,14 +576,28 @@ function mkNodeEl(id){
 
   var media='';
   if(!isPos){
-    if(n.playing && ytId){
-      // youtube-nocookie embed; if blocked on file:// the stop btn still shows
-      var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
-      media='<div class="nvframe"><iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
-        +'<div class="nvstop" title="Stop video">&#x25A0;</div>'
-        +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a></div>';
-    } else if(ytId){
-      media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
+    if(ytId){
+      if(n.playing){
+        var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+        media='<div class="nvframe"><iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+          +'<div class="nvstop" title="Stop">&#x25A0;</div>'
+          +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a></div>';
+      } else {
+        media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
+      }
+    } else if(igId){
+      if(n.playing){
+        media='<div class="nvframe ig-embed" style="background:#fff;overflow-y:auto;height:400px;aspect-ratio:unset;border-radius:8px">'
+          +'<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/'+igId+'/?utm_source=ig_embed" data-instgrm-version="14" style="width:100%;min-width:unset;margin:0;border:none;box-shadow:none;border-radius:0"></blockquote>'
+          +'<div class="nvstop" style="position:absolute;top:4px;right:4px" title="Stop">&#x25A0;</div></div>';
+        loadIGScript();
+        setTimeout(function(){if(window.instgrm)window.instgrm.Embeds.process();},400);
+      } else {
+        media='<div class="nvthumb" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
+          +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
+          +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
+          +'<div class="nvplay" style="background:rgba(255,255,255,.9)"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11" fill="#dc2743"/></svg></div></div>';
+      }
     } else {
       media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
     }
@@ -606,11 +639,13 @@ function attachEv(el,id){
       nodes[id].playing=false; refreshNode(id); return;
     }
     if(open){ e.stopPropagation(); return; }
+    // Clicks inside ig-embed shouldn't bubble to arm/disarm
+    if(e.target.closest('.ig-embed')){e.stopPropagation();return;}
   });
 
   el.addEventListener('mousedown',function(e){
     if(e.target.classList.contains('delbtn')) return;
-    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')) return;
+    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')||e.target.closest('.ig-embed')) return;
     e.stopPropagation();
     downX=e.clientX; downY=e.clientY;
     var c=toC(e.clientX,e.clientY);
@@ -620,7 +655,7 @@ function attachEv(el,id){
 
   el.addEventListener('mouseup',function(e){
     if(e.target.classList.contains('delbtn')) return;
-    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')) return;
+    if(e.target.closest('.nvthumb')||e.target.closest('.nvframe')||e.target.closest('.ig-embed')) return;
     e.stopPropagation();
     var wasDrag=dragging;
     dragId=null; dragging=false;
