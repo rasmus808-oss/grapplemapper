@@ -112,11 +112,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid var(--bord);padding:7px 18px;border-radius:22px;font-size:11px;color:var(--mut);pointer-events:none;white-space:nowrap;box-shadow:var(--sh);transition:opacity .4s}
 #arrow-label-editor{position:absolute;display:none;z-index:600}
 #arrow-label-editor input{border:1.5px solid var(--acc);border-radius:6px;padding:4px 8px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#fff;color:#555;outline:none;width:140px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ag.sel-arrow .ap{stroke:var(--acc);stroke-width:3}
 </style>
 </head>
 <body>
 <div id="bar">
-  <div class="logo"><div class="logo-mark">&#x2B21;</div>GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v1.0</span></div>
+  <div class="logo"><div class="logo-mark">&#x2B21;</div>GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v1.2</span></div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sep"></div>
@@ -240,6 +241,7 @@ let nodes={}, arrows=[], nid=0, aid=0;
 let sc=1, px=60, py=50;
 let armed=null;
 let selId=null, msel=new Set();
+let selArrowId=null;
 let dragId=null, dragOff={x:0,y:0}, dragging=false;
 let mqOn=false, mqSt=null;
 let curType='position', curColor='#6b46c1', curBg='#ede9f8';
@@ -303,8 +305,9 @@ function toC(cx,cy){var r=wrap.getBoundingClientRect();return{x:(cx-r.left-px)/s
 
 // Canvas background events
 wrap.addEventListener('mousedown',function(e){
-  if(e.target.closest && e.target.closest('.node')) return; // handled by node
+  if(e.target.closest && e.target.closest('.node')) return;
   if(armed){disarm();return;}
+  deselectArrow();
   var bg=e.target===wrap||e.target===canvas||e.target.id==='dotbg'||e.target===asvg||e.target.tagName==='svg';
   if(!bg) return;
   var c=toC(e.clientX,e.clientY);
@@ -382,9 +385,10 @@ window.addEventListener('mouseup',function(e){
   }
 });
 window.addEventListener('keydown',function(e){
-  if(e.key==='Escape') disarm();
+  if(e.key==='Escape'){ disarm(); deselectArrow(); }
   if((e.key==='Delete'||e.key==='Backspace')&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
     e.preventDefault();
+    if(selArrowId){ delArrow(selArrowId); return; }
     if(msel.size>0){[...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
     else if(selId) delNode(selId);
   }
@@ -468,26 +472,21 @@ function addArrow(from,to,label){
 
   g.appendChild(hit);g.appendChild(line);g.appendChild(lbg);g.appendChild(txt);
 
-  // Single click = delete (with short delay to let dblclick cancel it)
-  var clickTimer=null;
+  // Single click = SELECT arrow (highlight it)
   g.addEventListener('click',function(e){
     e.stopPropagation();
-    clickTimer=setTimeout(function(){
-      arrows=arrows.filter(function(x){return x.id!==id;});
-      g.remove();
-    },220);
+    selectArrow(id);
   });
-  // Double-click = edit label (cancels the delete timer)
+  // Double-click = edit label
   g.addEventListener('dblclick',function(e){
-    clearTimeout(clickTimer);
     e.stopPropagation();
     var r=wrap.getBoundingClientRect();
     var mx=parseFloat(txt.getAttribute('x'))*sc+px+r.left;
     var my=parseFloat(txt.getAttribute('y'))*sc+py+r.top;
     openALE(id, mx, my);
   });
-  g.addEventListener('mouseenter',function(){line.setAttribute('stroke','#6b46c1');lbg.setAttribute('stroke','#6b46c1');});
-  g.addEventListener('mouseleave',function(){line.setAttribute('stroke','#b39ddb');lbg.setAttribute('stroke','#c4b5f8');});
+  g.addEventListener('mouseenter',function(){if(selArrowId!==id){line.setAttribute('stroke','#6b46c1');lbg.setAttribute('stroke','#6b46c1');}});
+  g.addEventListener('mouseleave',function(){if(selArrowId!==id){line.setAttribute('stroke','#b39ddb');lbg.setAttribute('stroke','#c4b5f8');}});
 
   asvg.insertBefore(g,pline);
   posArrow(a);
@@ -530,6 +529,33 @@ function posArrow(a){
   }
 }
 function redrawArrows(){arrows.forEach(posArrow);}
+
+function selectArrow(id){
+  deselectArrow();
+  selArrowId=id;
+  var g=document.getElementById(id); if(!g) return;
+  g.classList.add('sel-arrow');
+  var line=g.querySelector('.ap');
+  if(line) line.setAttribute('stroke','#6b46c1');
+  // Deselect nodes
+  document.querySelectorAll('.node.sel').forEach(function(n){n.classList.remove('sel');});
+  selId=null; document.getElementById('detail').classList.remove('on');
+}
+function deselectArrow(){
+  if(!selArrowId) return;
+  var g=document.getElementById(selArrowId);
+  if(g){
+    g.classList.remove('sel-arrow');
+    var line=g.querySelector('.ap'); if(line) line.setAttribute('stroke','#b39ddb');
+    var lbg=g.querySelector('rect.albl'); if(lbg) lbg.setAttribute('stroke','#c4b5f8');
+  }
+  selArrowId=null;
+}
+function delArrow(id){
+  arrows=arrows.filter(function(x){return x.id!==id;});
+  var g=document.getElementById(id); if(g) g.remove();
+  if(selArrowId===id) selArrowId=null;
+}
 
 // Arm/disarm
 function arm(id){
@@ -582,17 +608,18 @@ function mkNodeEl(id){
         media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
       }
     } else if(igId){
+      var igUrl='https://www.instagram.com/p/'+igId+'/';
       if(n.playing){
-        // Direct IG embed iframe — margin-top clips the account header row
         media='<div class="ig-clip">'
           +'<iframe src="https://www.instagram.com/p/'+igId+'/embed/" scrolling="no" allowtransparency="true" allowfullscreen="true"></iframe>'
           +'<div class="nvstop" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1" title="Stop">&#x25A0;</div>'
-          +'<a href="'+n.url+'" target="_blank" class="nvopen" style="position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:10;text-decoration:none" title="Open in Instagram">&#x2197;</a>'
+          +'<a href="'+igUrl+'" target="_blank" class="nvopen" style="position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:10;text-decoration:none" title="Open in Instagram">&#x2197;</a>'
           +'</div>';
       } else {
         media='<div class="nvthumb portrait" style="background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
           +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
           +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
+          +'<span style="color:rgba(255,255,255,.7);font-size:10px">Click to load</span>'
           +'<div class="nvplay" style="background:rgba(255,255,255,.9)"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11" fill="#dc2743"/></svg></div></div>';
       }
     } else {
@@ -731,28 +758,42 @@ function onUrl(val){
   urlTimer=setTimeout(function(){refreshNode(selId);openDetail(selId);fetchSugg(val);},700);
 }
 async function fetchSugg(url){
-  var ytId=parseYT(url); if(!ytId) return;
+  var ytId=parseYT(url);
+  var igId=parseIG(url);
   var box=document.getElementById('name-suggestions');
   box.innerHTML='<span class="nchip loading">Fetching title...</span>';
+
+  var title='';
   try{
-    var r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');
-    if(!r.ok){box.innerHTML='';return;}
-    var title=(await r.json()).title||'';
-    // Auto-apply the raw title immediately
-    if(selId&&title){
-      applyName(title);
+    if(ytId){
+      var r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');
+      if(r.ok) title=(await r.json()).title||'';
+    } else if(igId){
+      // Instagram oEmbed — requires no auth for public posts
+      var r=await fetch('https://graph.facebook.com/v18.0/instagram_oembed?url='+encodeURIComponent(url)+'&format=json');
+      if(r.ok) title=(await r.json()).title||'';
+      // Fallback: try public oembed endpoint
+      if(!title){
+        var r2=await fetch('https://api.instagram.com/oembed?url='+encodeURIComponent(url));
+        if(r2.ok) title=(await r2.json()).title||'';
+      }
     }
-    // Build BJJ-specific alternative suggestions
-    var bjj=['guard','pass','sweep','armbar','triangle','kimura','choke','mount','side control','half guard','heel hook','submission','takedown','escape','back take','omoplata','guillotine','americana','ezekiel','torreando','leg drag','knee cut'];
-    var hits=[];
-    bjj.forEach(function(t){if(title.toLowerCase().includes(t)){var c=t.split(' ').map(function(w){return w[0].toUpperCase()+w.slice(1);}).join(' ');if(!hits.includes(c))hits.push(c);}});
-    // Show alternatives only (raw title already applied above)
-    if(hits.length){
-      box.innerHTML='<div style="font-size:10px;color:var(--mut);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Rename to:</div>'+hits.slice(0,5).map(function(s){return '<div class="nchip" onclick="applyName(\''+esc(s)+'\')">'+esc(s)+'</div>';}).join('');
-    } else {
-      box.innerHTML='';
-    }
-  }catch(e){box.innerHTML='';}
+  }catch(e){}
+
+  if(!title){box.innerHTML='';return;}
+
+  // Auto-apply title
+  if(selId) applyName(title);
+
+  // BJJ keyword alternatives
+  var bjj=['guard','pass','sweep','armbar','triangle','kimura','choke','mount','side control','half guard','heel hook','submission','takedown','escape','back take','omoplata','guillotine','americana','ezekiel','torreando','leg drag','knee cut'];
+  var hits=[];
+  bjj.forEach(function(t){if(title.toLowerCase().includes(t)){var c=t.split(' ').map(function(w){return w[0].toUpperCase()+w.slice(1);}).join(' ');if(!hits.includes(c))hits.push(c);}});
+  if(hits.length){
+    box.innerHTML='<div style="font-size:10px;color:var(--mut);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Rename to:</div>'+hits.slice(0,5).map(function(s){return '<div class="nchip" onclick="applyName(\''+esc(s)+'\')">'+esc(s)+'</div>';}).join('');
+  } else {
+    box.innerHTML='';
+  }
 }
 function applyName(name){if(!selId)return;nodes[selId].label=name;document.getElementById('dp-t').value=name;var el=document.getElementById(selId);var t=el&&el.querySelector('.ntitle');if(t)t.textContent=name;}
 function updType(val){if(!selId)return;var meta=META[val]||META.position;nodes[selId].type=val;nodes[selId].color=meta.color;nodes[selId].bg=meta.bg;refreshNode(selId);openDetail(selId);}
