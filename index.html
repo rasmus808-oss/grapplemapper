@@ -70,7 +70,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #wrap{flex:1;position:relative;overflow:hidden;background:#eceae6}
 #dotbg{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#b0ada6 1.2px,transparent 1.2px);background-size:24px 24px;opacity:.55}
 #canvas{position:absolute;top:0;left:0;transform-origin:0 0}
-.node{position:absolute;width:190px;background:var(--surf);border:1.5px solid var(--bord);border-radius:12px;box-shadow:var(--sh);cursor:pointer;user-select:none;transition:border-color .15s,box-shadow .15s}
+.node{position:absolute;width:190px;background:var(--surf);border:1.5px solid var(--bord);border-radius:12px;box-shadow:var(--sh);cursor:pointer;user-select:none;transition:border-color .15s,box-shadow .15s,width .25s ease,border-radius .25s ease}
 .node:hover{border-color:var(--bord2);box-shadow:var(--sh2)}
 .node.armed{border-color:var(--acc)!important;box-shadow:0 0 0 3px var(--al),var(--sh2)!important;cursor:crosshair}
 .node.tgt{border-color:#06b6d4!important;box-shadow:0 0 0 3px rgba(6,182,212,.2)!important}
@@ -136,7 +136,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.0</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.2</span>
   </div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
@@ -625,15 +625,28 @@ function mkNodeEl(id){
   var isPos=(n.type==='position');
   var ytId=parseYT(n.url);
   var igId=parseIG(n.url);
+  var hasVideo=!!(ytId||igId);
+
+  // Position nodes without video: minimal pill. With video: full card like action nodes.
+  var isPill=isPos&&!hasVideo&&!n.playing;
+
   var el=document.createElement('div');
   el.id=id;
-  el.className='node'+(isPos?' pos-node':'');
-  var nodeW = igId ? 200 : 220; // IG reels narrower (portrait), YT wider
+  el.className='node'+(isPill?' pos-node':'');
+
+  // Width: playing YT → wider (360px), playing IG → portrait (220px), thumbnail → 220px, pill → 190px
+  var nodeW;
+  if(n.playing && ytId)       nodeW=320;
+  else if(n.playing && igId)  nodeW=220;
+  else if(hasVideo)           nodeW=220;
+  else                        nodeW=190;
+
   el.style.left=n.x+'px'; el.style.top=n.y+'px'; el.style.width=nodeW+'px';
   nodes[id].w=nodeW;
 
+  // Build media section
   var media='';
-  if(!isPos){
+  if(hasVideo){
     if(ytId){
       if(n.playing){
         var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
@@ -645,19 +658,30 @@ function mkNodeEl(id){
       }
     } else if(igId){
       var igUrl='https://www.instagram.com/p/'+igId+'/';
-      // IG iframes always trigger consent redirect — show thumbnail + open link only
       media='<div class="nvthumb portrait" style="background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
         +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
         +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
         +'<span style="color:rgba(255,255,255,.8);font-size:10px">Click to open &#x2197;</span>'
         +'</div>';
-    } else {
-      media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
     }
+  } else if(!isPill){
+    // Action node with no video — show placeholder icon
+    media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
   }
 
-  var bar=isPos?'<div class="nbar" style="background:'+n.color+';height:6px"></div>':'<div class="nbar" style="background:'+n.color+'"></div>';
-  var body='<div class="nbody"><div class="ntag" style="background:'+n.bg+';color:'+(meta.textColor||n.color)+'">'+meta.label+'</div><div class="ntitle">'+esc(n.label)+'</div>'+(n.desc&&!isPos?'<div class="ndesc">'+esc(n.desc)+'</div>':'')+'</div>';
+  // Bar
+  var bar='<div class="nbar" style="background:'+n.color+';height:'+(isPill?'6':'4')+'px"></div>';
+
+  // Body — position pill: no tag, no desc. Full card: show all.
+  var body;
+  if(isPill){
+    body='<div class="nbody"><div class="ntitle" style="font-weight:700;font-size:12px">'+esc(n.label)+'</div></div>';
+  } else {
+    body='<div class="nbody"><div class="ntag" style="background:'+n.bg+';color:'+(meta.textColor||n.color)+'">'+meta.label+'</div>'
+      +'<div class="ntitle">'+esc(n.label)+'</div>'
+      +(n.desc?'<div class="ndesc">'+esc(n.desc)+'</div>':'')
+      +'</div>';
+  }
 
   el.innerHTML='<div class="ninner">'+bar+media+body+'</div><div class="delbtn">\xd7</div>';
   return el;
@@ -854,81 +878,136 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 
 // ── BJJ AUTOCOMPLETE DICTIONARY ──
 var BJJ_TERMS=[
-  // Positions
-  {name:'Closed guard',type:'position'},{name:'Half guard',type:'position'},
-  {name:'Quarter guard',type:'position'},{name:'Deep half guard',type:'position'},
-  {name:'Butterfly guard',type:'position'},{name:'X-guard',type:'position'},
-  {name:'Single leg X',type:'position'},{name:'De La Riva guard',type:'position'},
-  {name:'Reverse De La Riva',type:'position'},{name:'Spider guard',type:'position'},
-  {name:'Lasso guard',type:'position'},{name:'Worm guard',type:'position'},
-  {name:'Rubber guard',type:'position'},{name:'Overhook guard',type:'position'},
-  {name:'Z-guard',type:'position'},{name:'Knee shield',type:'position'},
-  {name:'Side control',type:'position'},{name:'Mount',type:'position'},
-  {name:'High mount',type:'position'},{name:'Low mount',type:'position'},
-  {name:'S-mount',type:'position'},{name:'Back mount',type:'position'},
-  {name:'Back control',type:'position'},{name:'Turtle',type:'position'},
-  {name:'North-south',type:'position'},{name:'Kesa gatame',type:'position'},
-  {name:'Reverse kesa gatame',type:'position'},{name:'Open guard',type:'position'},
-  {name:'Standing',type:'position'},{name:'Seated guard',type:'position'},
-  // Passes
-  {name:'Knee slice pass',type:'pass'},{name:'Torreando pass',type:'pass'},
-  {name:'Leg drag',type:'pass'},{name:'Smash pass',type:'pass'},
-  {name:'Double under pass',type:'pass'},{name:'Bullfighter pass',type:'pass'},
-  {name:'Stack pass',type:'pass'},{name:'Over-under pass',type:'pass'},
-  {name:'Long step pass',type:'pass'},{name:'Headquarters pass',type:'pass'},
-  {name:'X-pass',type:'pass'},{name:'Tripod pass',type:'pass'},
-  {name:'Cartwheel pass',type:'pass'},{name:'Headquarters position',type:'pass'},
-  // Sweeps
-  {name:'Scissor sweep',type:'sweep'},{name:'Flower sweep',type:'sweep'},
-  {name:'Hip bump sweep',type:'sweep'},{name:'Pendulum sweep',type:'sweep'},
-  {name:'Sit-up sweep',type:'sweep'},{name:'Tripod sweep',type:'sweep'},
-  {name:'X-guard sweep',type:'sweep'},{name:'Butterfly sweep',type:'sweep'},
-  {name:'Single leg sweep',type:'sweep'},{name:'Sickle sweep',type:'sweep'},
-  {name:'Lasso sweep',type:'sweep'},{name:'Waiter sweep',type:'sweep'},
-  {name:'Homer Simpson sweep',type:'sweep'},{name:'Berimbolo',type:'sweep'},
-  {name:'Old school sweep',type:'sweep'},{name:'Overhead sweep',type:'sweep'},
-  {name:'Tornado sweep',type:'sweep'},{name:'Matrix sweep',type:'sweep'},
-  // Submissions
-  {name:'Armbar',type:'submission'},{name:'Triangle choke',type:'submission'},
-  {name:'Rear naked choke',type:'submission'},{name:'Guillotine',type:'submission'},
-  {name:'Arm-in guillotine',type:'submission'},{name:'Kimura',type:'submission'},
-  {name:'Americana',type:'submission'},{name:'Omoplata',type:'submission'},
-  {name:'Heel hook',type:'submission'},{name:'Inside heel hook',type:'submission'},
-  {name:'Outside heel hook',type:'submission'},{name:'Kneebar',type:'submission'},
-  {name:'Calf slicer',type:'submission'},{name:'Ankle lock',type:'submission'},
-  {name:'Toe hold',type:'submission'},{name:'Bicep slicer',type:'submission'},
-  {name:'Ezekiel choke',type:'submission'},{name:'Bow and arrow choke',type:'submission'},
-  {name:'Cross collar choke',type:'submission'},{name:'Baseball bat choke',type:'submission'},
-  {name:"D'Arce choke",type:'submission'},{name:'Anaconda choke',type:'submission'},
-  {name:'Peruvian necktie',type:'submission'},{name:'North-south choke',type:'submission'},
-  {name:'Twister',type:'submission'},{name:'Wrist lock',type:'submission'},
-  {name:'Gogoplata',type:'submission'},{name:'Buggy choke',type:'submission'},
-  {name:'Von flue choke',type:'submission'},{name:'Ninja choke',type:'submission'},
-  // Takedowns
-  {name:'Double leg',type:'takedown'},{name:'Single leg',type:'takedown'},
-  {name:'Ankle pick',type:'takedown'},{name:'Hip toss',type:'takedown'},
-  {name:'O-goshi',type:'takedown'},{name:'Seoi nage',type:'takedown'},
-  {name:'Uchi mata',type:'takedown'},{name:'Ko uchi gari',type:'takedown'},
-  {name:'Osoto gari',type:'takedown'},{name:'Harai goshi',type:'takedown'},
-  {name:'Tomoe nage',type:'takedown'},{name:'Fireman carry',type:'takedown'},
-  {name:'Duck under',type:'takedown'},{name:'Body lock takedown',type:'takedown'},
-  // Escapes
-  {name:'Shrimp escape',type:'escape'},{name:'Bridge and roll',type:'escape'},
-  {name:'Hip escape',type:'escape'},{name:'Granby roll',type:'escape'},
-  {name:'Elbow-knee escape',type:'escape'},{name:'Technical stand-up',type:'escape'},
-  {name:'Sit-out',type:'escape'},{name:'Switch',type:'escape'},
-  {name:'Turtle recover',type:'escape'},{name:'Lockdown escape',type:'escape'},
-  // Transitions
-  {name:'Back take',type:'transition'},{name:'Guard recovery',type:'transition'},
-  {name:'Stand up',type:'transition'},{name:'Sit out',type:'transition'},
-  {name:'Switch hips',type:'transition'},{name:'Granby roll',type:'transition'},
-  {name:'Sit to turtle',type:'transition'},{name:'Turtle to guard',type:'transition'},
-  {name:'Half to full guard',type:'transition'},{name:'Side control to mount',type:'transition'},
-  {name:'Mount to back',type:'transition'},{name:'Back to mount',type:'transition'},
-  {name:'Knee on belly',type:'transition'},{name:'Leg drag to back',type:'transition'},
-  {name:'Scramble',type:'transition'},{name:'Re-guard',type:'transition'},
-  {name:'Roll through',type:'transition'},{name:'Spin under',type:'transition'},
-  {name:'Sit up to single',type:'transition'},{name:'Underhook battle',type:'transition'},
+  // ── Core Positions & Controls ──
+  {name:'Closed Guard',type:'position'},{name:'Full Guard',type:'position'},
+  {name:'Open Guard',type:'position'},{name:'Half Guard',type:'position'},
+  {name:'Top Half Guard',type:'position'},{name:'Bottom Half Guard',type:'position'},
+  {name:'Deep Half Guard',type:'position'},{name:'Butterfly Guard',type:'position'},
+  {name:'De La Riva Guard',type:'position'},{name:'DLR',type:'position'},
+  {name:'Reverse De La Riva',type:'position'},{name:'Spider Guard',type:'position'},
+  {name:'Lasso Guard',type:'position'},{name:'X-Guard',type:'position'},
+  {name:'Single Leg X',type:'position'},{name:'SLX',type:'position'},
+  {name:'50/50 Guard',type:'position'},{name:'Rubber Guard',type:'position'},
+  {name:'Z-Guard',type:'position'},{name:'Knee Shield',type:'position'},
+  {name:'Side Control',type:'position'},{name:'Side Mount',type:'position'},
+  {name:'Scarf Hold',type:'position'},{name:'Kesa Gatame',type:'position'},
+  {name:'North-South',type:'position'},{name:'Knee on Belly',type:'position'},
+  {name:'KOB',type:'position'},{name:'Knee Ride',type:'position'},
+  {name:'Mount',type:'position'},{name:'Full Mount',type:'position'},
+  {name:'High Mount',type:'position'},{name:'Low Mount',type:'position'},
+  {name:'Back Mount',type:'position'},{name:'Rear Mount',type:'position'},
+  {name:'Back Control',type:'position'},{name:'Turtle Position',type:'position'},
+  {name:'Quarter Guard',type:'position'},{name:'Leg Entanglement',type:'position'},
+  {name:'Ashigarami',type:'position'},{name:'Standing',type:'position'},
+  {name:'Clinch',type:'position'},{name:'Crucifix',type:'position'},
+  {name:'Dogfight',type:'position'},{name:'Lockdown',type:'position'},
+  {name:'Crab Ride',type:'position'},{name:'Worm Guard',type:'position'},
+  {name:'K Guard',type:'position'},{name:'S-Mount',type:'position'},
+  {name:'Headquarters',type:'position'},
+  // ── Fundamental Movements ──
+  {name:'Bridge',type:'escape'},{name:'Upa',type:'escape'},
+  {name:'Shrimp',type:'escape'},{name:'Hip Escape',type:'escape'},
+  {name:'Framing',type:'escape'},{name:'Technical Stand-Up',type:'escape'},
+  {name:'Hip Heist',type:'transition'},{name:'Posture Up',type:'position'},
+  {name:'Break Posture',type:'transition'},{name:'Grip Break',type:'transition'},
+  {name:'Shrimping',type:'escape'},{name:'Bridging',type:'escape'},
+  {name:'Guard Retention',type:'escape'},{name:'Guard Recovery',type:'escape'},
+  {name:'Reguard',type:'escape'},
+  // ── Sweeps ──
+  {name:'Scissor Sweep',type:'sweep'},{name:'Reverse Scissor Sweep',type:'sweep'},
+  {name:'Hip Bump Sweep',type:'sweep'},{name:'Sit-Up Sweep',type:'sweep'},
+  {name:'Bump Sweep',type:'sweep'},{name:'Flower Sweep',type:'sweep'},
+  {name:'Knee Flower Sweep',type:'sweep'},{name:'Omoplata Sweep',type:'sweep'},
+  {name:'Lumberjack Sweep',type:'sweep'},{name:'Waiter Sweep',type:'sweep'},
+  {name:'Balloon Sweep',type:'sweep'},{name:'Double Ankle Sweep',type:'sweep'},
+  {name:'Single Ankle Sweep',type:'sweep'},{name:'Butterfly Sweep',type:'sweep'},
+  {name:'Hook Sweep',type:'sweep'},{name:'Elevator Sweep',type:'sweep'},
+  {name:'De La Riva Sweep',type:'sweep'},{name:'Berimbolo Sweep',type:'sweep'},
+  {name:'Heel Grab Sweep',type:'sweep'},{name:'Tripod Sweep',type:'sweep'},
+  {name:'Collar and Sleeve Sweep',type:'sweep'},{name:'Pendulum Sweep',type:'sweep'},
+  {name:'Arm Drag Sweep',type:'sweep'},{name:'Ankle Pick Sweep',type:'sweep'},
+  {name:'Old School Sweep',type:'sweep'},{name:'Knee Shield Sweep',type:'sweep'},
+  {name:'Underhook Sweep',type:'sweep'},{name:'Lockdown Sweep',type:'sweep'},
+  {name:'Deep Half Sweep',type:'sweep'},{name:'Sweep to Back Take',type:'sweep'},
+  {name:'Berimbolo',type:'sweep'},
+  // ── Escapes & Defenses ──
+  {name:'Mount Escape',type:'escape'},{name:'Bridge and Roll',type:'escape'},
+  {name:'Elbow-Knee Escape',type:'escape'},{name:'Shrimp Escape',type:'escape'},
+  {name:'Side Control Escape',type:'escape'},{name:'Frame and Shrimp',type:'escape'},
+  {name:'Underhook Escape',type:'escape'},{name:'Back Escape',type:'escape'},
+  {name:'Hook Removal',type:'escape'},{name:'Turtle Escape',type:'escape'},
+  {name:'North-South Escape',type:'escape'},{name:'Knee on Belly Escape',type:'escape'},
+  {name:'Scarf Hold Escape',type:'escape'},{name:'Submission Escape',type:'escape'},
+  {name:'Armbar Escape',type:'escape'},{name:'Triangle Escape',type:'escape'},
+  {name:'RNC Escape',type:'escape'},{name:'Hip Escape to Re-Guard',type:'escape'},
+  // ── Guard Passes ──
+  {name:'Knee Slide Pass',type:'pass'},{name:'Knee Cut Pass',type:'pass'},
+  {name:'Knee Slice',type:'pass'},{name:'Double Under Pass',type:'pass'},
+  {name:'Torreando Pass',type:'pass'},{name:'Bullfighter Pass',type:'pass'},
+  {name:'Leg Drag Pass',type:'pass'},{name:'Over-Under Pass',type:'pass'},
+  {name:'Stack Pass',type:'pass'},{name:'Long Step Pass',type:'pass'},
+  {name:'X-Pass',type:'pass'},{name:'Hip Switch Pass',type:'pass'},
+  {name:'Folding Pass',type:'pass'},{name:'Matador Pass',type:'pass'},
+  {name:'Force Half Guard Pass',type:'pass'},{name:'Smash Pass',type:'pass'},
+  {name:'Headquarters Pass',type:'pass'},
+  // ── Submissions ──
+  {name:'Armbar',type:'submission'},{name:'Straight Armbar',type:'submission'},
+  {name:'Flying Armbar',type:'submission'},{name:'Kimura',type:'submission'},
+  {name:'Americana',type:'submission'},{name:'Keylock',type:'submission'},
+  {name:'Omoplata',type:'submission'},{name:'Triangle Choke',type:'submission'},
+  {name:'Mounted Triangle',type:'submission'},{name:'Rear Naked Choke',type:'submission'},
+  {name:'RNC',type:'submission'},{name:'Mata Leao',type:'submission'},
+  {name:'Cross Collar Choke',type:'submission'},{name:'Bow and Arrow Choke',type:'submission'},
+  {name:'Guillotine',type:'submission'},{name:"D'Arce Choke",type:'submission'},
+  {name:'Anaconda Choke',type:'submission'},{name:'Ezekiel Choke',type:'submission'},
+  {name:'North-South Choke',type:'submission'},{name:'Paper Cutter Choke',type:'submission'},
+  {name:'Loop Choke',type:'submission'},{name:'Baseball Choke',type:'submission'},
+  {name:'Arm Triangle',type:'submission'},{name:'Heel Hook',type:'submission'},
+  {name:'Inside Heel Hook',type:'submission'},{name:'Outside Heel Hook',type:'submission'},
+  {name:'Straight Ankle Lock',type:'submission'},{name:'Kneebar',type:'submission'},
+  {name:'Toe Hold',type:'submission'},{name:'Calf Slicer',type:'submission'},
+  {name:'Wristlock',type:'submission'},{name:'Bicep Slicer',type:'submission'},
+  {name:'Shoulder Lock',type:'submission'},{name:'Electric Chair',type:'submission'},
+  {name:'Gogoplata',type:'submission'},{name:'Tarikoplata',type:'submission'},
+  {name:'Estima Lock',type:'submission'},{name:'Buggy Choke',type:'submission'},
+  {name:'Von Flue Choke',type:'submission'},{name:'Peruvian Necktie',type:'submission'},
+  // ── Takedowns & Throws ──
+  {name:'Double Leg Takedown',type:'takedown'},{name:'Single Leg Takedown',type:'takedown'},
+  {name:'Blast Double',type:'takedown'},{name:'Ankle Pick',type:'takedown'},
+  {name:'Foot Sweep',type:'takedown'},{name:'Inside Trip',type:'takedown'},
+  {name:'Outside Trip',type:'takedown'},{name:'Ouchi Gari',type:'takedown'},
+  {name:'Uchi Mata',type:'takedown'},{name:'Osoto Gari',type:'takedown'},
+  {name:'Body Lock',type:'takedown'},{name:'Suplex',type:'takedown'},
+  {name:'Hip Throw',type:'takedown'},{name:'Arm Drag Takedown',type:'takedown'},
+  {name:'Pull Guard',type:'takedown'},{name:'Duck Under',type:'takedown'},
+  // ── Grips & Controls ──
+  {name:'Underhook',type:'position'},{name:'Overhook',type:'position'},
+  {name:'Gable Grip',type:'position'},{name:'Collar Grip',type:'position'},
+  {name:'Sleeve Grip',type:'position'},{name:'Cross Collar',type:'position'},
+  {name:'Russian Tie',type:'position'},{name:'2-on-1',type:'position'},
+  {name:'Wrist Control',type:'position'},{name:'Arm Drag',type:'transition'},
+  {name:'Snapdown',type:'transition'},
+  // ── Transitions ──
+  {name:'Back Take',type:'transition'},{name:'Transition to Mount',type:'transition'},
+  {name:'Pass to Side Control',type:'transition'},{name:'Recover Guard',type:'transition'},
+  {name:'Counter to Pass',type:'transition'},{name:'Grip Fighting',type:'transition'},
+  {name:'Stand Up',type:'transition'},{name:'Sit Out',type:'transition'},
+  {name:'Switch Hips',type:'transition'},{name:'Sit to Turtle',type:'transition'},
+  {name:'Turtle to Guard',type:'transition'},{name:'Half to Full Guard',type:'transition'},
+  {name:'Side Control to Mount',type:'transition'},{name:'Mount to Back',type:'transition'},
+  {name:'Scramble',type:'transition'},{name:'Re-Guard',type:'transition'},
+  {name:'Roll Through',type:'transition'},{name:'Spin Under',type:'transition'},
+  {name:'Leg Drag to Back',type:'transition'},{name:'Knee on Belly',type:'transition'},
+  // ── Flowchart Phrases ──
+  {name:'From Closed Guard',type:'position'},{name:'From Half Guard',type:'position'},
+  {name:'From Side Control',type:'position'},{name:'From Mount',type:'position'},
+  {name:'From Back Control',type:'position'},{name:'From Turtle',type:'position'},
+  {name:'Sweep to Mount',type:'sweep'},{name:'Sweep to Back',type:'sweep'},
+  {name:'Pass to Mount',type:'pass'},{name:'Pass to Back',type:'pass'},
+  {name:'Escape to Guard',type:'escape'},{name:'Counter Attack',type:'transition'},
+  {name:'Setup for Armbar',type:'submission'},{name:'Setup for Triangle',type:'submission'},
+  {name:'Setup for Kimura',type:'submission'},{name:'Chain to Submission',type:'submission'},
+  {name:'Submission Setup',type:'submission'},
 ];
 
 var acCursor=-1;
@@ -938,8 +1017,9 @@ function acSearch(val){
   if(!val||val.length<1){drop.style.display='none';return;}
   var q=val.toLowerCase();
   var matches=BJJ_TERMS.filter(function(t){
-    return t.name.toLowerCase().startsWith(q)||t.name.toLowerCase().includes(' '+q);
-  }).slice(0,8);
+    var n=t.name.toLowerCase();
+    return n.startsWith(q)||n.includes(' '+q)||n.includes('-'+q);
+  }).slice(0,10);
   if(!matches.length){drop.style.display='none';return;}
   var meta_color=function(type){return (META[type]||META.position);};
   drop.innerHTML=matches.map(function(t,i){
@@ -1029,7 +1109,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v2.0.gmap';
+  var filename=slug+'-v2.2.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -1157,7 +1237,7 @@ function exportPDF(){
       +'}'
       +'</style></head><body>'
       +'<div class="header">'+title+'</div>'
-      +'<div class="subheader">GrappleMapper v2.0 — exported '+new Date().toLocaleDateString()+'</div>'
+      +'<div class="subheader">GrappleMapper v2.1 — exported '+new Date().toLocaleDateString()+'</div>'
       +'<div style="position:relative;width:'+mapW+'px;height:'+mapH+'px">'
       +'<div style="position:absolute;top:0;left:0;transform:translate('+(minX*-1)+'px,'+(minY*-1)+'px)">'
       +svgStr+canvasStr
