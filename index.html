@@ -113,11 +113,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #arrow-label-editor{position:absolute;display:none;z-index:600}
 #arrow-label-editor input{border:1.5px solid var(--acc);border-radius:6px;padding:4px 8px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#fff;color:#555;outline:none;width:140px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .ag.sel-arrow .ap{stroke:var(--acc);stroke-width:3}
+#toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#1a1917;color:#fff;padding:8px 20px;border-radius:22px;font-size:12px;font-weight:500;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2);opacity:0;transition:opacity .25s;z-index:600}
 </style>
 </head>
 <body>
 <div id="bar">
-  <div class="logo"><div class="logo-mark">&#x2B21;</div>GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v1.4</span></div>
+  <div class="logo"><div class="logo-mark">&#x2B21;</div>GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v1.5</span></div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sep"></div>
@@ -125,6 +126,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
   <button class="btn" onclick="loadTmpl('half')">Half guard</button>
   <button class="btn" onclick="loadTmpl('mount')">Mount attacks</button>
   <div class="sp"></div>
+  <button class="btn" onclick="saveMap()" title="Save map to .gmap file" style="font-weight:600">&#x1F4BE; Save</button>
+  <button class="btn" onclick="document.getElementById('load-input').click()" title="Load .gmap file">&#x1F4C2; Load</button>
+  <input type="file" id="load-input" accept=".gmap,.json" style="display:none" onchange="loadMap(this)">
+  <div class="sep"></div>
   <button class="btn" onclick="clearAll()" style="color:var(--dan)">Clear</button>
   <button class="btn pri" onclick="addNodeCenter()">+ Add</button>
   <div class="sep"></div>
@@ -216,6 +221,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
     <div id="badge"></div>
     <div id="cstatus"></div>
     <div id="arrow-label-editor"><input id="ale-input" placeholder="label..." /></div>
+    <div id="toast"></div>
     <div id="hint">Click a node to arm it &middot; click another to connect &middot; drag canvas to pan</div>
   </div>
 </div>
@@ -756,7 +762,7 @@ function updN(field,val){
 function onUrl(val){
   if(!selId) return; nodes[selId].url=val;
   clearTimeout(urlTimer);
-  urlTimer=setTimeout(function(){refreshNode(selId);openDetail(selId);fetchSugg(val);},700);
+  urlTimer=setTimeout(function(){refreshNode(selId);openDetail(selId);fetchSugg(val);autoSave();},700);
 }
 async function fetchSugg(url){
   var ytId=parseYT(url);
@@ -810,10 +816,120 @@ function clearAll(){
   nodes={};arrows=[];nid=0;aid=0;selId=null;msel.clear();disarm();
   document.getElementById('detail').classList.remove('on');
   document.getElementById('badge').style.display='none';
+  autoSave();
 }
 var hintGone=false;
 function hideHint(){if(hintGone)return;hintGone=true;var h=document.getElementById('hint');if(h){h.style.opacity='0';setTimeout(function(){h.remove();},500);}}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── TOAST ──
+var toastTimer=null;
+function showToast(msg,dur){
+  var t=document.getElementById('toast'); if(!t) return;
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.style.opacity='0';},dur||2200);
+}
+
+// ── SERIALISE / DESERIALISE ──
+function getMapState(){
+  return {
+    version:'1.5',
+    title:document.getElementById('ftitle').value||'My BJJ System',
+    nodes:Object.values(nodes).map(function(n){
+      return {id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,label:n.label,desc:n.desc,url:n.url,type:n.type};
+    }),
+    arrows:arrows.map(function(a){return {id:a.id,from:a.from,to:a.to,label:a.label||''};}),
+    nid:nid, aid:aid
+  };
+}
+
+function restoreMapState(state, skipConfirm){
+  if(!state||!state.nodes) return;
+  if(!skipConfirm && Object.keys(nodes).length>0){
+    if(!confirm('Load this map? Current work will be replaced.')) return;
+  }
+  // Clear without confirm
+  Object.keys(nodes).forEach(function(id){var el=document.getElementById(id);if(el)el.remove();});
+  asvg.querySelectorAll('g').forEach(function(g){g.remove();});
+  asvg.appendChild(pline);
+  nodes={};arrows=[];selId=null;msel.clear();deselectArrow();disarm();
+  document.getElementById('detail').classList.remove('on');
+  document.getElementById('badge').style.display='none';
+
+  document.getElementById('ftitle').value=state.title||'My BJJ System';
+  nid=state.nid||0; aid=state.aid||0;
+
+  state.nodes.forEach(function(nd){
+    var meta=META[nd.type]||META.position;
+    nodes[nd.id]={id:nd.id,x:nd.x,y:nd.y,w:nd.w||190,h:nd.h||120,
+      label:nd.label,desc:nd.desc||'',url:nd.url||'',
+      type:nd.type,color:meta.color,bg:meta.bg,playing:false};
+    renderNode(nd.id);
+  });
+  setTimeout(function(){
+    state.nodes.forEach(function(nd){nodes[nd.id].h=document.getElementById(nd.id)?.offsetHeight||120;});
+    state.arrows.forEach(function(a){addArrow(a.from,a.to,a.label||'');});
+    redrawArrows(); fitView();
+  },200);
+}
+
+// ── SAVE TO FILE ──
+function saveMap(){
+  var state=getMapState();
+  var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
+  var filename=slug+'-v1.5.gmap';
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Saved as '+filename);
+  autoSave();
+}
+
+// ── LOAD FROM FILE ──
+function loadMap(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var state=JSON.parse(e.target.result);
+      restoreMapState(state, false);
+      showToast('Loaded: '+file.name);
+      autoSave();
+    }catch(err){
+      showToast('Error reading file — is it a valid .gmap?');
+    }
+  };
+  reader.readAsText(file);
+  input.value=''; // reset so same file can be reloaded
+}
+
+// ── AUTO-SAVE TO LOCALSTORAGE ──
+var autoSaveTimer=null;
+function autoSave(){
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer=setTimeout(function(){
+    try{
+      localStorage.setItem('grapplemapper_autosave', JSON.stringify(getMapState()));
+    }catch(e){}
+  },1500);
+}
+
+// Hook autosave onto all mutations
+var _origAddNode=addNode;
+function addNode(x,y,data){var id=_origAddNode(x,y,data);autoSave();return id;}
+var _origDelNode=delNode;
+function delNode(id){_origDelNode(id);autoSave();}
+var _origAddArrow=addArrow;
+function addArrow(from,to,label){_origAddArrow(from,to,label);autoSave();}
+var _origDelArrow=delArrow;
+function delArrow(id){_origDelArrow(id);autoSave();}
+
+// Also autosave on drag end, title change, URL change
+wrap.addEventListener('mouseup',function(){if(dragId)setTimeout(autoSave,100);});
+document.getElementById('ftitle').addEventListener('input',autoSave);
 
 var TMPLS={
   guard:{title:'Open Guard Passing System',
@@ -875,8 +991,18 @@ function loadTmpl(name){
   },200);
 }
 
-loadTmpl('guard');
-applyT();
+// ── INIT — restore autosave or load default template ──
+(function(){
+  var saved=null;
+  try{ saved=JSON.parse(localStorage.getItem('grapplemapper_autosave')||'null'); }catch(e){}
+  if(saved&&saved.nodes&&saved.nodes.length>0){
+    restoreMapState(saved, true);
+    showToast('Restored your last session ✓');
+  } else {
+    loadTmpl('guard');
+  }
+  applyT();
+})();
 </script>
 </body>
 </html>
