@@ -93,6 +93,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .nvplay svg{width:12px;height:12px;fill:var(--acc);margin-left:2px}
 .nvframe{width:calc(100% - 12px);aspect-ratio:16/9;position:relative;background:#000;margin:6px;border-radius:8px;overflow:hidden}
 .nvframe iframe{position:absolute;top:-12.5%;left:-12.5%;width:125%;height:125%;border:none;display:block;pointer-events:auto}
+/* Transparent scroll-shield — sits above iframe, passes clicks through to buttons only */
+.nvframe .scroll-shield{position:absolute;inset:0;z-index:5;cursor:default}
 .nvframe .nvstop{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1}
 .nvframe .nvstop:hover{background:rgba(0,0,0,.9)}
 .nvframe .nvopen{position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1;text-decoration:none}
@@ -136,7 +138,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.2</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.3</span>
   </div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
@@ -314,6 +316,8 @@ function applyT(){
   redrawArrows();
 }
 wrap.addEventListener('wheel',function(e){
+  // Don't intercept scroll if mouse is over a playing video iframe
+  if(e.target.closest && e.target.closest('.nvframe')) return;
   e.preventDefault();
   var r=wrap.getBoundingClientRect();
   var mx=e.clientX-r.left, my=e.clientY-r.top;
@@ -323,6 +327,16 @@ wrap.addEventListener('wheel',function(e){
   sc=ns; applyT();
 },{passive:false});
 function zBy(d){sc=Math.min(3,Math.max(.12,sc+d));applyT();}
+// Called from scroll-shield overlay on playing video nodes
+function canvasWheel(e){
+  e.preventDefault();
+  var r=wrap.getBoundingClientRect();
+  var mx=e.clientX-r.left, my=e.clientY-r.top;
+  var d=e.deltaY<0?1.1:.91;
+  var ns=Math.min(3,Math.max(.12,sc*d));
+  px=mx-(mx-px)*(ns/sc); py=my-(my-py)*(ns/sc);
+  sc=ns; applyT();
+}
 function fitView(){
   var ns=Object.values(nodes); if(!ns.length){sc=1;px=60;py=50;applyT();return;}
   var minX=Math.min.apply(null,ns.map(function(n){return n.x;}))-40;
@@ -634,9 +648,9 @@ function mkNodeEl(id){
   el.id=id;
   el.className='node'+(isPill?' pos-node':'');
 
-  // Width: playing YT → wider (360px), playing IG → portrait (220px), thumbnail → 220px, pill → 190px
+  // Width: playing YT → wider to fill 16:9 naturally, thumbnail → 220px, pill → 190px
   var nodeW;
-  if(n.playing && ytId)       nodeW=320;
+  if(n.playing && ytId)       nodeW=340;
   else if(n.playing && igId)  nodeW=220;
   else if(hasVideo)           nodeW=220;
   else                        nodeW=190;
@@ -650,9 +664,12 @@ function mkNodeEl(id){
     if(ytId){
       if(n.playing){
         var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
-        media='<div class="nvframe"><iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+        media='<div class="nvframe">'
+          +'<iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+          +'<div class="scroll-shield" onwheel="canvasWheel(event)"></div>'
           +'<div class="nvstop" title="Stop">&#x25A0;</div>'
-          +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a></div>';
+          +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a>'
+          +'</div>';
       } else {
         media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
       }
@@ -711,16 +728,33 @@ function attachEv(el,id){
       e.stopPropagation();
       var igId=parseIG(nodes[id].url);
       if(igId){
-        // IG embeds redirect to consent page — just open the post directly
         window.open('https://www.instagram.com/p/'+igId+'/', '_blank');
       } else {
-        nodes[id].playing=true; refreshNode(id);
+        // Save pre-play dimensions
+        var elNow=document.getElementById(id);
+        if(elNow) nodes[id].prePlayW=nodes[id].w||190;
+        nodes[id].prePlayH=nodes[id].h||120;
+        nodes[id].playing=true;
+        refreshNode(id);
+        // After render, update h and redraw arrows
+        setTimeout(function(){
+          var el2=document.getElementById(id);
+          if(el2){nodes[id].h=el2.offsetHeight||120;redrawArrows();}
+        },100);
       }
       return;
     }
     if(stop){
       e.stopPropagation();
-      nodes[id].playing=false; refreshNode(id); return;
+      nodes[id].playing=false;
+      // Restore pre-play width
+      if(nodes[id].prePlayW) nodes[id].w=nodes[id].prePlayW;
+      refreshNode(id);
+      setTimeout(function(){
+        var el2=document.getElementById(id);
+        if(el2){nodes[id].h=el2.offsetHeight||120;redrawArrows();}
+      },100);
+      return;
     }
     if(open){ e.stopPropagation(); return; }
     if(e.target.closest('.ig-clip')){e.stopPropagation();return;}
@@ -1109,7 +1143,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v2.2.gmap';
+  var filename=slug+'-v2.3.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
