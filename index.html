@@ -117,7 +117,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 </head>
 <body>
 <div id="bar">
-  <div class="logo"><div class="logo-mark">&#x2B21;</div>GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v1.2</span></div>
+  <div class="logo"><div class="logo-mark">&#x2B21;</div>GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v1.4</span></div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sep"></div>
@@ -209,7 +209,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
             <path d="M0,0 L8,4 L0,8 Z" fill="#b39ddb"/>
           </marker>
         </defs>
-        <path id="pline" fill="none" stroke="#9c7fcc" stroke-width="2" stroke-dasharray="8,5" style="display:none"/>
+        <path id="pline" fill="none" stroke="#9c7fcc" stroke-width="2" stroke-dasharray="8,5" style="display:none;pointer-events:none"/>
       </svg>
     </div>
     <div id="marquee"></div>
@@ -346,11 +346,11 @@ window.addEventListener('mousemove',function(e){
     var c=toC(e.clientX,e.clientY);
     var n=nodes[armed];
     var sx=n.x+(n.w||190)/2, sy=n.y+(n.h||120)/2;
-    var dx=c.x-sx, dy=c.y-sy, pull=Math.min(80,Math.abs(dy)*.4);
-    var d;
-    if(Math.abs(dy)>=Math.abs(dx)) d='M'+sx+','+sy+' C'+sx+','+(sy+pull)+' '+c.x+','+(c.y-pull)+' '+c.x+','+c.y;
-    else{var cx=(sx+c.x)/2;d='M'+sx+','+sy+' C'+cx+','+sy+' '+cx+','+c.y+' '+c.x+','+c.y;}
-    pline.setAttribute('d',d);
+    var dx2=c.x-sx,dy2=c.y-sy,adx2=Math.abs(dx2),ady2=Math.abs(dy2);
+    var ex,ey;
+    if(ady2>=adx2){ey=dy2>0?1:-1;ex=0;sy=dy2>0?n.y+(n.h||120):n.y;}
+    else{ex=dx2>0?1:-1;ey=0;sx=dx2>0?n.x+(n.w||190):n.x;}
+    pline.setAttribute('d',pathD(sx,sy,ex,ey,c.x,c.y,0,0));
     pline.style.display='';
     Object.keys(nodes).forEach(function(id){
       document.getElementById(id).classList.toggle('tgt',id!==armed);
@@ -436,10 +436,48 @@ function edgePts(id){
   var w=n.w||190; var h=n.h||120;
   return{r:{x:n.x+w,y:n.y+h/2},l:{x:n.x,y:n.y+h/2},b:{x:n.x+w/2,y:n.y+h},t:{x:n.x+w/2,y:n.y}};
 }
-function pathD(x1,y1,x2,y2){
-  var dx=Math.abs(x2-x1),dy=Math.abs(y2-y1);
-  if(dy>=dx){var pull=Math.min(80,dy*.4);return 'M'+x1+','+y1+' C'+x1+','+(y1+pull)+' '+x2+','+(y2-pull)+' '+x2+','+y2;}
-  var cx=(x1+x2)/2;return 'M'+x1+','+y1+' C'+cx+','+y1+' '+cx+','+y2+' '+x2+','+y2;
+function pathD(x1,y1,ex,ey,x2,y2,rx,ry){
+  var dist=Math.hypot(x2-x1,y2-y1);
+  var pull=Math.max(50,dist*0.4);
+  var c1x=x1+ex*pull,c1y=y1+ey*pull;
+  var c2x=x2+rx*pull,c2y=y2+ry*pull;
+  return 'M'+x1+','+y1+' C'+c1x+','+c1y+' '+c2x+','+c2y+' '+x2+','+y2;
+}
+function posArrow(a){
+  var g=document.getElementById(a.id); if(!g) return;
+  var fn=nodes[a.from],tn=nodes[a.to]; if(!fn||!tn) return;
+  var fw=fn.w||190,fh=fn.h||120;
+  var tw=tn.w||190,th=tn.h||120;
+  var fcx=fn.x+fw/2,fcy=fn.y+fh/2;
+  var tcx=tn.x+tw/2,tcy=tn.y+th/2;
+  var dx=tcx-fcx,dy=tcy-fcy;
+  var adx=Math.abs(dx),ady=Math.abs(dy);
+  var fp,ep,tp,rp;
+  if(ady>=adx){
+    if(dy>0){fp={x:fn.x+fw/2,y:fn.y+fh};ep={x:0,y:1};tp={x:tn.x+tw/2,y:tn.y};rp={x:0,y:-1};}
+    else    {fp={x:fn.x+fw/2,y:fn.y};   ep={x:0,y:-1};tp={x:tn.x+tw/2,y:tn.y+th};rp={x:0,y:1};}
+  } else {
+    if(dx>0){fp={x:fn.x+fw,y:fn.y+fh/2};ep={x:1,y:0};tp={x:tn.x,y:tn.y+th/2};rp={x:-1,y:0};}
+    else    {fp={x:fn.x,y:fn.y+fh/2};   ep={x:-1,y:0};tp={x:tn.x+tw,y:tn.y+th/2};rp={x:1,y:0};}
+  }
+  var d=pathD(fp.x,fp.y,ep.x,ep.y,tp.x,tp.y,rp.x,rp.y);
+  g.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d);});
+  var mx=(fp.x+tp.x)/2,my=(fp.y+tp.y)/2;
+  var txt=g.querySelector('text');
+  var lbg=g.querySelector('rect.albl');
+  if(txt){
+    txt.setAttribute('x',mx);txt.setAttribute('y',my);
+    var label=a.label||'';
+    txt.textContent=label;
+    if(lbg){
+      if(label){
+        var lw=label.length*5.5+16;
+        lbg.setAttribute('x',mx-lw/2);lbg.setAttribute('y',my-9);
+        lbg.setAttribute('width',lw);lbg.setAttribute('height',18);
+        lbg.setAttribute('display','');
+      } else {lbg.setAttribute('display','none');}
+    }
+  }
 }
 function addArrow(from,to,label){
   label=label||'';
@@ -448,7 +486,7 @@ function addArrow(from,to,label){
   var a={id:id,from:from,to:to,label:label};
   arrows.push(a);
   var g=document.createElementNS('http://www.w3.org/2000/svg','g');
-  g.id=id; g.style.cursor='pointer';
+  g.id=id; g.style.cursor='pointer'; g.style.pointerEvents='all';
 
   var hit=document.createElementNS('http://www.w3.org/2000/svg','path');
   hit.setAttribute('fill','none');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','16');
@@ -490,43 +528,6 @@ function addArrow(from,to,label){
 
   asvg.insertBefore(g,pline);
   posArrow(a);
-}
-function posArrow(a){
-  var g=document.getElementById(a.id); if(!g) return;
-  var fn=nodes[a.from],tn=nodes[a.to]; if(!fn||!tn) return;
-  var fh=fn.h||120, th=tn.h||120;
-  var fdx=tn.x-fn.x, fdy=tn.y-fn.y;
-  var fp,tp;
-  if(Math.abs(fdy)>=Math.abs(fdx)){
-    fp=fdy>0?{x:fn.x+95,y:fn.y+fh}:{x:fn.x+95,y:fn.y};
-    tp=fdy>0?{x:tn.x+95,y:tn.y}:{x:tn.x+95,y:tn.y+th};
-  } else {
-    fp=fdx>0?{x:fn.x+190,y:fn.y+fh/2}:{x:fn.x,y:fn.y+fh/2};
-    tp=fdx>0?{x:tn.x,y:tn.y+th/2}:{x:tn.x+190,y:tn.y+th/2};
-  }
-  var d=pathD(fp.x,fp.y,tp.x,tp.y);
-  g.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d);});
-  var mx=(fp.x+tp.x)/2, my=(fp.y+tp.y)/2;
-  var txt=g.querySelector('text');
-  var lbg=g.querySelector('rect.albl');
-  if(txt){
-    txt.setAttribute('x',mx); txt.setAttribute('y',my);
-    var label=a.label||'';
-    txt.textContent=label;
-    // Size and position the background pill
-    if(lbg){
-      if(label){
-        // Approximate text width
-        var tw=label.length*5.5+16;
-        var th2=18;
-        lbg.setAttribute('x',mx-tw/2); lbg.setAttribute('y',my-th2/2);
-        lbg.setAttribute('width',tw); lbg.setAttribute('height',th2);
-        lbg.setAttribute('display','');
-      } else {
-        lbg.setAttribute('display','none');
-      }
-    }
-  }
 }
 function redrawArrows(){arrows.forEach(posArrow);}
 
@@ -609,19 +610,12 @@ function mkNodeEl(id){
       }
     } else if(igId){
       var igUrl='https://www.instagram.com/p/'+igId+'/';
-      if(n.playing){
-        media='<div class="ig-clip">'
-          +'<iframe src="https://www.instagram.com/p/'+igId+'/embed/" scrolling="no" allowtransparency="true" allowfullscreen="true"></iframe>'
-          +'<div class="nvstop" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1" title="Stop">&#x25A0;</div>'
-          +'<a href="'+igUrl+'" target="_blank" class="nvopen" style="position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:10;text-decoration:none" title="Open in Instagram">&#x2197;</a>'
-          +'</div>';
-      } else {
-        media='<div class="nvthumb portrait" style="background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
-          +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
-          +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
-          +'<span style="color:rgba(255,255,255,.7);font-size:10px">Click to load</span>'
-          +'<div class="nvplay" style="background:rgba(255,255,255,.9)"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11" fill="#dc2743"/></svg></div></div>';
-      }
+      // IG iframes always trigger consent redirect — show thumbnail + open link only
+      media='<div class="nvthumb portrait" style="background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
+        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
+        +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
+        +'<span style="color:rgba(255,255,255,.8);font-size:10px">Click to open &#x2197;</span>'
+        +'</div>';
     } else {
       media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
     }
@@ -656,7 +650,14 @@ function attachEv(el,id){
     var open=e.target.closest('.nvopen');
     if(thumb){
       e.stopPropagation();
-      nodes[id].playing=true; refreshNode(id); return;
+      var igId=parseIG(nodes[id].url);
+      if(igId){
+        // IG embeds redirect to consent page — just open the post directly
+        window.open('https://www.instagram.com/p/'+igId+'/', '_blank');
+      } else {
+        nodes[id].playing=true; refreshNode(id);
+      }
+      return;
     }
     if(stop){
       e.stopPropagation();
