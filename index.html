@@ -114,6 +114,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #arrow-label-editor input{border:1.5px solid var(--acc);border-radius:6px;padding:4px 8px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#fff;color:#555;outline:none;width:140px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .ag.sel-arrow .ap{stroke:var(--acc);stroke-width:3}
 #toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#1a1917;color:#fff;padding:8px 20px;border-radius:22px;font-size:12px;font-weight:500;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2);opacity:0;transition:opacity .25s;z-index:600}
+#ac-drop{position:absolute;left:0;right:0;top:100%;background:var(--surf);border:1.5px solid var(--acc);border-radius:9px;box-shadow:var(--sh2);z-index:700;display:none;overflow:hidden;margin-top:2px;max-height:220px;overflow-y:auto}
+#ac-drop::-webkit-scrollbar{width:3px}
+#ac-drop::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.ac-item{padding:7px 11px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ac-item:hover,.ac-item.ac-active{background:var(--al)}
+.ac-item .ac-name{font-weight:500;color:var(--text)}
+.ac-item .ac-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -186,8 +193,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
         <button class="btn" style="padding:3px 9px;font-size:11px;color:var(--dan)" onclick="delSelected()">Delete</button>
       </div>
       <div id="vpreview"></div>
-      <div class="field"><label>Title</label>
-        <input id="dp-t" placeholder="e.g. Knee cut pass" oninput="updN('label',this.value)">
+      <div class="field" style="position:relative"><label>Title</label>
+        <input id="dp-t" placeholder="Type to search techniques..." oninput="updN('label',this.value);acSearch(this.value)" onkeydown="acKey(event)" autocomplete="off">
+        <div id="ac-drop"></div>
         <div id="name-suggestions"></div>
       </div>
       <div class="field"><label>Video URL (YouTube / Instagram / Facebook)</label>
@@ -825,7 +833,117 @@ var hintGone=false;
 function hideHint(){if(hintGone)return;hintGone=true;var h=document.getElementById('hint');if(h){h.style.opacity='0';setTimeout(function(){h.remove();},500);}}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ── TOAST ──
+// ── BJJ AUTOCOMPLETE DICTIONARY ──
+var BJJ_TERMS=[
+  // Positions
+  {name:'Closed guard',type:'position'},{name:'Half guard',type:'position'},
+  {name:'Quarter guard',type:'position'},{name:'Deep half guard',type:'position'},
+  {name:'Butterfly guard',type:'position'},{name:'X-guard',type:'position'},
+  {name:'Single leg X',type:'position'},{name:'De La Riva guard',type:'position'},
+  {name:'Reverse De La Riva',type:'position'},{name:'Spider guard',type:'position'},
+  {name:'Lasso guard',type:'position'},{name:'Worm guard',type:'position'},
+  {name:'Rubber guard',type:'position'},{name:'Overhook guard',type:'position'},
+  {name:'Z-guard',type:'position'},{name:'Knee shield',type:'position'},
+  {name:'Side control',type:'position'},{name:'Mount',type:'position'},
+  {name:'High mount',type:'position'},{name:'Low mount',type:'position'},
+  {name:'S-mount',type:'position'},{name:'Back mount',type:'position'},
+  {name:'Back control',type:'position'},{name:'Turtle',type:'position'},
+  {name:'North-south',type:'position'},{name:'Kesa gatame',type:'position'},
+  {name:'Reverse kesa gatame',type:'position'},{name:'Open guard',type:'position'},
+  {name:'Standing',type:'position'},{name:'Seated guard',type:'position'},
+  // Passes
+  {name:'Knee slice pass',type:'pass'},{name:'Torreando pass',type:'pass'},
+  {name:'Leg drag',type:'pass'},{name:'Smash pass',type:'pass'},
+  {name:'Double under pass',type:'pass'},{name:'Bullfighter pass',type:'pass'},
+  {name:'Stack pass',type:'pass'},{name:'Over-under pass',type:'pass'},
+  {name:'Long step pass',type:'pass'},{name:'Headquarters pass',type:'pass'},
+  {name:'X-pass',type:'pass'},{name:'Tripod pass',type:'pass'},
+  {name:'Cartwheel pass',type:'pass'},{name:'Headquarters position',type:'pass'},
+  // Sweeps
+  {name:'Scissor sweep',type:'sweep'},{name:'Flower sweep',type:'sweep'},
+  {name:'Hip bump sweep',type:'sweep'},{name:'Pendulum sweep',type:'sweep'},
+  {name:'Sit-up sweep',type:'sweep'},{name:'Tripod sweep',type:'sweep'},
+  {name:'X-guard sweep',type:'sweep'},{name:'Butterfly sweep',type:'sweep'},
+  {name:'Single leg sweep',type:'sweep'},{name:'Sickle sweep',type:'sweep'},
+  {name:'Lasso sweep',type:'sweep'},{name:'Waiter sweep',type:'sweep'},
+  {name:'Homer Simpson sweep',type:'sweep'},{name:'Berimbolo',type:'sweep'},
+  {name:'Old school sweep',type:'sweep'},{name:'Overhead sweep',type:'sweep'},
+  {name:'Tornado sweep',type:'sweep'},{name:'Matrix sweep',type:'sweep'},
+  // Submissions
+  {name:'Armbar',type:'submission'},{name:'Triangle choke',type:'submission'},
+  {name:'Rear naked choke',type:'submission'},{name:'Guillotine',type:'submission'},
+  {name:'Arm-in guillotine',type:'submission'},{name:'Kimura',type:'submission'},
+  {name:'Americana',type:'submission'},{name:'Omoplata',type:'submission'},
+  {name:'Heel hook',type:'submission'},{name:'Inside heel hook',type:'submission'},
+  {name:'Outside heel hook',type:'submission'},{name:'Kneebar',type:'submission'},
+  {name:'Calf slicer',type:'submission'},{name:'Ankle lock',type:'submission'},
+  {name:'Toe hold',type:'submission'},{name:'Bicep slicer',type:'submission'},
+  {name:'Ezekiel choke',type:'submission'},{name:'Bow and arrow choke',type:'submission'},
+  {name:'Cross collar choke',type:'submission'},{name:'Baseball bat choke',type:'submission'},
+  {name:"D'Arce choke",type:'submission'},{name:'Anaconda choke',type:'submission'},
+  {name:'Peruvian necktie',type:'submission'},{name:'North-south choke',type:'submission'},
+  {name:'Twister',type:'submission'},{name:'Wrist lock',type:'submission'},
+  {name:'Gogoplata',type:'submission'},{name:'Buggy choke',type:'submission'},
+  {name:'Von flue choke',type:'submission'},{name:'Ninja choke',type:'submission'},
+  // Takedowns
+  {name:'Double leg',type:'takedown'},{name:'Single leg',type:'takedown'},
+  {name:'Ankle pick',type:'takedown'},{name:'Hip toss',type:'takedown'},
+  {name:'O-goshi',type:'takedown'},{name:'Seoi nage',type:'takedown'},
+  {name:'Uchi mata',type:'takedown'},{name:'Ko uchi gari',type:'takedown'},
+  {name:'Osoto gari',type:'takedown'},{name:'Harai goshi',type:'takedown'},
+  {name:'Tomoe nage',type:'takedown'},{name:'Fireman carry',type:'takedown'},
+  {name:'Duck under',type:'takedown'},{name:'Body lock takedown',type:'takedown'},
+  // Escapes
+  {name:'Shrimp escape',type:'escape'},{name:'Bridge and roll',type:'escape'},
+  {name:'Hip escape',type:'escape'},{name:'Granby roll',type:'escape'},
+  {name:'Elbow-knee escape',type:'escape'},{name:'Technical stand-up',type:'escape'},
+  {name:'Sit-out',type:'escape'},{name:'Switch',type:'escape'},
+  {name:'Turtle recover',type:'escape'},{name:'Lockdown escape',type:'escape'},
+];
+
+var acCursor=-1;
+function acSearch(val){
+  var drop=document.getElementById('ac-drop');
+  acCursor=-1;
+  if(!val||val.length<1){drop.style.display='none';return;}
+  var q=val.toLowerCase();
+  var matches=BJJ_TERMS.filter(function(t){
+    return t.name.toLowerCase().startsWith(q)||t.name.toLowerCase().includes(' '+q);
+  }).slice(0,8);
+  if(!matches.length){drop.style.display='none';return;}
+  var meta_color=function(type){return (META[type]||META.position);};
+  drop.innerHTML=matches.map(function(t,i){
+    var m=meta_color(t.type);
+    return '<div class="ac-item" data-name="'+esc(t.name)+'" onmousedown="acPick(\''+esc(t.name)+'\')"><span class="ac-name">'+esc(t.name)+'</span><span class="ac-tag" style="background:'+m.bg+';color:'+(m.textColor||m.color)+'">'+m.label+'</span></div>';
+  }).join('');
+  drop.style.display='block';
+}
+function acPick(name){
+  document.getElementById('dp-t').value=name;
+  updN('label',name);
+  document.getElementById('ac-drop').style.display='none';
+  acCursor=-1;
+}
+function acKey(e){
+  var drop=document.getElementById('ac-drop');
+  var items=drop.querySelectorAll('.ac-item');
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();acCursor=Math.min(acCursor+1,items.length-1);acHighlight(items);}
+  else if(e.key==='ArrowUp'){e.preventDefault();acCursor=Math.max(acCursor-1,0);acHighlight(items);}
+  else if(e.key==='Enter'&&acCursor>=0){e.preventDefault();acPick(items[acCursor].dataset.name);}
+  else if(e.key==='Escape'){drop.style.display='none';acCursor=-1;}
+}
+function acHighlight(items){
+  items.forEach(function(el,i){el.classList.toggle('ac-active',i===acCursor);});
+  if(acCursor>=0) items[acCursor].scrollIntoView({block:'nearest'});
+}
+// Close dropdown when clicking outside
+document.addEventListener('mousedown',function(e){
+  if(!e.target.closest('#ac-drop')&&e.target.id!=='dp-t'){
+    var d=document.getElementById('ac-drop');
+    if(d) d.style.display='none';
+  }
+});
 var toastTimer=null;
 function showToast(msg,dur){
   var t=document.getElementById('toast'); if(!t) return;
