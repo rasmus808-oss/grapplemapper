@@ -119,8 +119,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #cstatus{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;display:none;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
 #hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid var(--bord);padding:7px 18px;border-radius:22px;font-size:11px;color:var(--mut);pointer-events:none;white-space:nowrap;box-shadow:var(--sh);transition:opacity .4s}
 #arrow-label-editor{position:absolute;display:none;z-index:600}
-#arrow-label-editor input{border:1.5px solid var(--acc);border-radius:6px;padding:4px 8px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#fff;color:#555;outline:none;width:140px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.ag.sel-arrow .ap{stroke:var(--acc);stroke-width:3}
+#arrow-label-editor input{border:none;background:#eceae6;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;color:#555;outline:none;width:120px;text-align:center;box-shadow:none;caret-color:#555;padding:2px 6px;border-radius:3px}
+.ag.sel-arrow .ap{stroke:#666;stroke-width:3}
 #toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#1a1917;color:#fff;padding:8px 20px;border-radius:22px;font-size:12px;font-weight:500;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2);opacity:0;transition:opacity .25s;z-index:600}
 #ac-drop{position:absolute;left:0;right:0;top:100%;background:var(--dark2);border:1.5px solid var(--acc);border-radius:9px;box-shadow:var(--sh2);z-index:700;display:none;overflow:hidden;margin-top:2px;max-height:220px;overflow-y:auto}
 #ac-drop::-webkit-scrollbar{width:3px}
@@ -141,7 +141,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.8</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v3.2</span>
   </div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
@@ -241,10 +241,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <svg id="asvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none" width="1" height="1">
         <defs>
           <marker id="ah" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="#b39ddb"/>
+            <path d="M0,0 L8,4 L0,8 Z" fill="#b0b0b0"/>
           </marker>
         </defs>
-        <path id="pline" fill="none" stroke="#9c7fcc" stroke-width="2" stroke-dasharray="8,5" style="display:none;pointer-events:none"/>
+        <path id="pline" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="8,5" style="display:none;pointer-events:none"/>
       </svg>
     </div>
     <div id="marquee"></div>
@@ -341,6 +341,37 @@ function canvasWheel(e){
   sc=ns; applyT();
 }
 var _muted={};
+
+// Listen for YouTube player state changes (video ended = state -1 or 0)
+window.addEventListener('message',function(e){
+  try{
+    var data=JSON.parse(e.data);
+    if(data.event==='infoDelivery'&&data.info&&typeof data.info.playerState!=='undefined'){
+      if(data.info.playerState===0){
+        // Video ended — find which node has this iframe and reset it
+        document.querySelectorAll('.nvframe iframe').forEach(function(iframe){
+          if(iframe.contentWindow===e.source){
+            var nframe=iframe.closest('.node');
+            if(nframe){
+              var nid=nframe.id;
+              if(nodes[nid]){
+                nodes[nid].playing=false;
+                if(nodes[nid].prePlayW) nodes[nid].w=nodes[nid].prePlayW;
+                delete _muted[nid];
+                refreshNode(nid);
+                setTimeout(function(){
+                  var el=document.getElementById(nid);
+                  if(el){nodes[nid].h=el.offsetHeight||120;redrawArrows();}
+                },100);
+              }
+            }
+          }
+        });
+      }
+    }
+  }catch(ex){}
+});
+
 function toggleMute(nodeId){
   var iframe=document.getElementById('ytf-'+nodeId); if(!iframe) return;
   _muted[nodeId]=!_muted[nodeId];
@@ -460,13 +491,17 @@ window.addEventListener('keydown',function(e){
 var aleArrowId=null;
 var aleInput=document.getElementById('ale-input');
 var aleDiv=document.getElementById('arrow-label-editor');
-function openALE(arrowId, screenX, screenY){
+function openALE(arrowId, canvasX, canvasY){
   aleArrowId=arrowId;
   var a=arrows.find(function(x){return x.id===arrowId;});
   aleInput.value=a?a.label||''  :'';
+  // canvasX/canvasY are SVG canvas coords — convert to wrap-relative screen px
+  var inputW=120, inputH=22;
+  var wrapX=canvasX*sc+px;
+  var wrapY=canvasY*sc+py;
   aleDiv.style.display='block';
-  aleDiv.style.left=(screenX-70)+'px';
-  aleDiv.style.top=(screenY-16)+'px';
+  aleDiv.style.left=(wrapX-inputW/2)+'px';
+  aleDiv.style.top=(wrapY-inputH/2)+'px';
   setTimeout(function(){aleInput.focus();aleInput.select();},30);
 }
 function closeALE(save){
@@ -485,10 +520,6 @@ aleInput.addEventListener('blur',function(){closeALE(true);});
 
 function updateArrowLabel(a){
   var g=document.getElementById(a.id); if(!g) return;
-  var txt=g.querySelector('text');
-  var bg=g.querySelector('rect.albl');
-  if(txt) txt.textContent=a.label||'';
-  // reposition
   posArrow(a);
 }
 
@@ -526,19 +557,9 @@ function posArrow(a){
   g.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d);});
   var mx=(fp.x+tp.x)/2,my=(fp.y+tp.y)/2;
   var txt=g.querySelector('text');
-  var lbg=g.querySelector('rect.albl');
   if(txt){
     txt.setAttribute('x',mx);txt.setAttribute('y',my);
-    var label=a.label||'';
-    txt.textContent=label;
-    if(lbg){
-      if(label){
-        var lw=label.length*5.5+16;
-        lbg.setAttribute('x',mx-lw/2);lbg.setAttribute('y',my-9);
-        lbg.setAttribute('width',lw);lbg.setAttribute('height',18);
-        lbg.setAttribute('display','');
-      } else {lbg.setAttribute('display','none');}
-    }
+    txt.textContent=a.label||'';
   }
 }
 function addArrow(from,to,label){
@@ -554,23 +575,21 @@ function addArrow(from,to,label){
   hit.setAttribute('fill','none');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','16');
 
   var line=document.createElementNS('http://www.w3.org/2000/svg','path');
-  line.setAttribute('fill','none');line.setAttribute('stroke','#b39ddb');line.setAttribute('stroke-width','2');
+  line.setAttribute('fill','none');line.setAttribute('stroke','#c0c0c0');line.setAttribute('stroke-width','2');
   line.setAttribute('marker-end','url(#ah)');
-
-  // Label background pill
-  var lbg=document.createElementNS('http://www.w3.org/2000/svg','rect');
-  lbg.setAttribute('class','albl');
-  lbg.setAttribute('rx','5');lbg.setAttribute('ry','5');
-  lbg.setAttribute('fill','#f5f3ff');lbg.setAttribute('stroke','#c4b5f8');lbg.setAttribute('stroke-width','1');
 
   // Label text
   var txt=document.createElementNS('http://www.w3.org/2000/svg','text');
   txt.setAttribute('text-anchor','middle');txt.setAttribute('dominant-baseline','middle');
   txt.setAttribute('font-style','italic');txt.setAttribute('font-size','11');
-  txt.setAttribute('fill','#7c5cbf');txt.setAttribute('font-family','Inter,sans-serif');
+  txt.setAttribute('fill','#666');txt.setAttribute('font-family','Inter,sans-serif');
+  txt.setAttribute('paint-order','stroke');
+  txt.setAttribute('stroke','#eceae6');
+  txt.setAttribute('stroke-width','4');
+  txt.setAttribute('stroke-linejoin','round');
   txt.textContent=label;
 
-  g.appendChild(hit);g.appendChild(line);g.appendChild(lbg);g.appendChild(txt);
+  g.appendChild(hit);g.appendChild(line);g.appendChild(txt);
 
   // Single click = SELECT arrow (highlight it)
   g.addEventListener('click',function(e){
@@ -580,13 +599,12 @@ function addArrow(from,to,label){
   // Double-click = edit label
   g.addEventListener('dblclick',function(e){
     e.stopPropagation();
-    var r=wrap.getBoundingClientRect();
-    var mx=parseFloat(txt.getAttribute('x'))*sc+px+r.left;
-    var my=parseFloat(txt.getAttribute('y'))*sc+py+r.top;
-    openALE(id, mx, my);
+    var cx=parseFloat(txt.getAttribute('x'));
+    var cy=parseFloat(txt.getAttribute('y'));
+    openALE(id, cx, cy);
   });
-  g.addEventListener('mouseenter',function(){if(selArrowId!==id){line.setAttribute('stroke','#6b46c1');lbg.setAttribute('stroke','#6b46c1');}});
-  g.addEventListener('mouseleave',function(){if(selArrowId!==id){line.setAttribute('stroke','#b39ddb');lbg.setAttribute('stroke','#c4b5f8');}});
+  g.addEventListener('mouseenter',function(){if(selArrowId!==id){line.setAttribute('stroke','#888');}});
+  g.addEventListener('mouseleave',function(){if(selArrowId!==id){line.setAttribute('stroke','#c0c0c0');}});
 
   asvg.insertBefore(g,pline);
   posArrow(a);
@@ -600,7 +618,7 @@ function selectArrow(id){
   var g=document.getElementById(id); if(!g) return;
   g.classList.add('sel-arrow');
   var line=g.querySelector('.ap');
-  if(line) line.setAttribute('stroke','#6b46c1');
+  if(line) line.setAttribute('stroke','#555');
   // Deselect nodes
   document.querySelectorAll('.node.sel').forEach(function(n){n.classList.remove('sel');});
   selId=null; document.getElementById('detail').classList.remove('on');
@@ -610,8 +628,8 @@ function deselectArrow(){
   var g=document.getElementById(selArrowId);
   if(g){
     g.classList.remove('sel-arrow');
-    var line=g.querySelector('.ap'); if(line) line.setAttribute('stroke','#b39ddb');
-    var lbg=g.querySelector('rect.albl'); if(lbg) lbg.setAttribute('stroke','#c4b5f8');
+    var line=g.querySelector('.ap'); if(line) line.setAttribute('stroke','#c0c0c0');
+
   }
   selArrowId=null;
 }
@@ -1173,7 +1191,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v2.8.gmap';
+  var filename=slug+'-v3.2.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
