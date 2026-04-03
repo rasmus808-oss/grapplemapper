@@ -138,7 +138,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.3</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.4</span>
   </div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
@@ -641,40 +641,47 @@ function mkNodeEl(id){
   var igId=parseIG(n.url);
   var hasVideo=!!(ytId||igId);
 
-  // Position nodes without video: minimal pill. With video: full card like action nodes.
+  // Determine aspect ratio from stored oEmbed dims, fallback to defaults
+  // videoW/videoH come from oEmbed; for Shorts YT returns e.g. 480x270 but URL pattern tells us it's a short
+  var vW=n.videoW||16, vH=n.videoH||9;
+  var isShort=n.url&&(n.url.includes('/shorts/')||vH>vW);
+  if(isShort){vW=9;vH=16;}
+  var aspectStr=vW+'/'+vH;
+
+  // isPill: position with no video and not playing
   var isPill=isPos&&!hasVideo&&!n.playing;
 
   var el=document.createElement('div');
   el.id=id;
   el.className='node'+(isPill?' pos-node':'');
 
-  // Width: playing YT → wider to fill 16:9 naturally, thumbnail → 220px, pill → 190px
+  // Node width: playing expands, thumbnail fixed, pill compact
+  var THUMB_W=isShort?160:220;   // portrait thumbs narrower
+  var PLAY_W =isShort?200:340;   // portrait playing narrower
   var nodeW;
-  if(n.playing && ytId)       nodeW=340;
-  else if(n.playing && igId)  nodeW=220;
-  else if(hasVideo)           nodeW=220;
-  else                        nodeW=190;
+  if(n.playing && ytId)      nodeW=PLAY_W;
+  else if(n.playing && igId) nodeW=200;
+  else if(hasVideo)          nodeW=THUMB_W;
+  else                       nodeW=190;
 
   el.style.left=n.x+'px'; el.style.top=n.y+'px'; el.style.width=nodeW+'px';
   nodes[id].w=nodeW;
 
-  // Build media section
   var media='';
   if(hasVideo){
     if(ytId){
       if(n.playing){
         var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
-        media='<div class="nvframe">'
+        media='<div class="nvframe" style="aspect-ratio:'+aspectStr+';width:calc(100% - 12px)">'
           +'<iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
           +'<div class="scroll-shield" onwheel="canvasWheel(event)"></div>'
           +'<div class="nvstop" title="Stop">&#x25A0;</div>'
           +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a>'
           +'</div>';
       } else {
-        media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
+        media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\');aspect-ratio:'+aspectStr+'"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
       }
     } else if(igId){
-      var igUrl='https://www.instagram.com/p/'+igId+'/';
       media='<div class="nvthumb portrait" style="background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
         +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
         +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
@@ -682,14 +689,11 @@ function mkNodeEl(id){
         +'</div>';
     }
   } else if(!isPill){
-    // Action node with no video — show placeholder icon
     media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
   }
 
-  // Bar
   var bar='<div class="nbar" style="background:'+n.color+';height:'+(isPill?'6':'4')+'px"></div>';
 
-  // Body — position pill: no tag, no desc. Full card: show all.
   var body;
   if(isPill){
     body='<div class="nbody"><div class="ntitle" style="font-weight:700;font-size:12px">'+esc(n.label)+'</div></div>';
@@ -862,12 +866,21 @@ async function fetchSugg(url){
   try{
     if(ytId){
       var r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');
-      if(r.ok) title=(await r.json()).title||'';
+      if(r.ok){
+        var data=await r.json();
+        title=data.title||'';
+        // Store actual video dimensions on the node
+        if(selId&&data.width&&data.height){
+          nodes[selId].videoW=data.width;
+          nodes[selId].videoH=data.height;
+          // Refresh node so thumbnail adopts correct ratio
+          refreshNode(selId);
+          openDetail(selId);
+        }
+      }
     } else if(igId){
-      // Instagram oEmbed — requires no auth for public posts
       var r=await fetch('https://graph.facebook.com/v18.0/instagram_oembed?url='+encodeURIComponent(url)+'&format=json');
       if(r.ok) title=(await r.json()).title||'';
-      // Fallback: try public oembed endpoint
       if(!title){
         var r2=await fetch('https://api.instagram.com/oembed?url='+encodeURIComponent(url));
         if(r2.ok) title=(await r2.json()).title||'';
@@ -877,10 +890,8 @@ async function fetchSugg(url){
 
   if(!title){box.innerHTML='';return;}
 
-  // Auto-apply title
   if(selId) applyName(title);
 
-  // BJJ keyword alternatives
   var bjj=['guard','pass','sweep','armbar','triangle','kimura','choke','mount','side control','half guard','heel hook','submission','takedown','escape','back take','omoplata','guillotine','americana','ezekiel','torreando','leg drag','knee cut'];
   var hits=[];
   bjj.forEach(function(t){if(title.toLowerCase().includes(t)){var c=t.split(' ').map(function(w){return w[0].toUpperCase()+w.slice(1);}).join(' ');if(!hits.includes(c))hits.push(c);}});
@@ -1102,7 +1113,7 @@ function getMapState(){
     version:'1.5',
     title:document.getElementById('ftitle').value||'My BJJ System',
     nodes:Object.values(nodes).map(function(n){
-      return {id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,label:n.label,desc:n.desc,url:n.url,type:n.type};
+      return {id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,label:n.label,desc:n.desc,url:n.url,type:n.type,videoW:n.videoW,videoH:n.videoH};
     }),
     arrows:arrows.map(function(a){return {id:a.id,from:a.from,to:a.to,label:a.label||''};}),
     nid:nid, aid:aid
@@ -1129,7 +1140,8 @@ function restoreMapState(state, skipConfirm){
     var meta=META[nd.type]||META.position;
     nodes[nd.id]={id:nd.id,x:nd.x,y:nd.y,w:nd.w||190,h:nd.h||120,
       label:nd.label,desc:nd.desc||'',url:nd.url||'',
-      type:nd.type,color:meta.color,bg:meta.bg,playing:false};
+      type:nd.type,color:meta.color,bg:meta.bg,playing:false,
+      videoW:nd.videoW||null,videoH:nd.videoH||null};
     renderNode(nd.id);
   });
   setTimeout(function(){
@@ -1143,7 +1155,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v2.3.gmap';
+  var filename=slug+'-v2.4.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
