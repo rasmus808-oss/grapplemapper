@@ -97,6 +97,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .nvframe .scroll-shield{position:absolute;inset:0;z-index:5;cursor:default}
 .nvframe .nvstop{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1}
 .nvframe .nvstop:hover{background:rgba(0,0,0,.9)}
+.nvframe .nvmute{position:absolute;top:4px;right:30px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:background .15s}
+.nvframe .nvmute:hover{background:rgba(0,0,0,.9)}
+.nvframe .nvmute svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nvframe .nvopen{position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;line-height:1;text-decoration:none}
 .nvframe .nvopen:hover{background:var(--acc)}
 /* Portrait video (reels) */
@@ -138,7 +141,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.7</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v2.8</span>
   </div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
@@ -336,6 +339,18 @@ function canvasWheel(e){
   var ns=Math.min(3,Math.max(.12,sc*d));
   px=mx-(mx-px)*(ns/sc); py=my-(my-py)*(ns/sc);
   sc=ns; applyT();
+}
+var _muted={};
+function toggleMute(nodeId){
+  var iframe=document.getElementById('ytf-'+nodeId); if(!iframe) return;
+  _muted[nodeId]=!_muted[nodeId];
+  var cmd=_muted[nodeId]?'mute':'unMute';
+  try{ iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:cmd,args:[]}),'*'); }catch(e){}
+  var btn=document.getElementById('mute-'+nodeId); if(!btn) return;
+  var svgMuted='<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+  var svgOn='<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+  btn.innerHTML=_muted[nodeId]?svgMuted:svgOn;
+  btn.style.opacity=_muted[nodeId]?'0.45':'1';
 }
 function fitView(){
   var ns=Object.values(nodes); if(!ns.length){sc=1;px=60;py=50;applyT();return;}
@@ -671,10 +686,13 @@ function mkNodeEl(id){
   if(hasVideo){
     if(ytId){
       if(n.playing){
-        var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+        var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1';
         media='<div class="nvframe" style="aspect-ratio:'+aspectStr+';width:calc(100% - 12px)">'
-          +'<iframe src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+          +'<iframe id="ytf-'+id+'" src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
           +'<div class="scroll-shield" onwheel="canvasWheel(event)"></div>'
+          +'<div class="nvmute" id="mute-'+id+'" title="Mute / Unmute" onclick="toggleMute(\''+id+'\');event.stopPropagation()">'
+          +'<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'
+          +'</div>'
           +'<div class="nvstop" title="Stop">&#x25A0;</div>'
           +'<a class="nvopen" href="'+n.url+'" target="_blank" title="Open in YouTube">&#x2197;</a>'
           +'</div>';
@@ -1155,7 +1173,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v2.7.gmap';
+  var filename=slug+'-v2.8.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
