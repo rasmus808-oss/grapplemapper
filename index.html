@@ -534,6 +534,7 @@ function addArrow(from,to,label){
 
   asvg.insertBefore(g,pline);
   posArrow(a);
+  autoSave();
 }
 function redrawArrows(){arrows.forEach(posArrow);}
 
@@ -562,6 +563,7 @@ function delArrow(id){
   arrows=arrows.filter(function(x){return x.id!==id;});
   var g=document.getElementById(id); if(g) g.remove();
   if(selArrowId===id) selArrowId=null;
+  autoSave();
 }
 
 // Arm/disarm
@@ -637,7 +639,7 @@ function renderNode(id){
   var el=mkNodeEl(id);
   attachEv(el,id);
   canvas.appendChild(el);
-  requestAnimationFrame(function(){nodes[id].h=el.offsetHeight||120;redrawArrows();});
+  requestAnimationFrame(function(){nodes[id].h=el.offsetHeight||120;redrawArrows();autoSave();});
 }
 function refreshNode(id){
   var old=document.getElementById(id); if(old) old.remove();
@@ -728,6 +730,7 @@ function delNode(id){
   if(selId===id){selId=null;document.getElementById('detail').classList.remove('on');}
   if(armed===id) disarm();
   msel.delete(id);
+  autoSave();
 }
 function delSelected(){
   if(msel.size>0){[...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
@@ -917,18 +920,8 @@ function autoSave(){
   },1500);
 }
 
-// Hook autosave onto all mutations
-var _origAddNode=addNode;
-function addNode(x,y,data){var id=_origAddNode(x,y,data);autoSave();return id;}
-var _origDelNode=delNode;
-function delNode(id){_origDelNode(id);autoSave();}
-var _origAddArrow=addArrow;
-function addArrow(from,to,label){_origAddArrow(from,to,label);autoSave();}
-var _origDelArrow=delArrow;
-function delArrow(id){_origDelArrow(id);autoSave();}
-
 // Also autosave on drag end, title change, URL change
-wrap.addEventListener('mouseup',function(){if(dragId)setTimeout(autoSave,100);});
+wrap.addEventListener('mouseup',function(){setTimeout(autoSave,100);});
 document.getElementById('ftitle').addEventListener('input',autoSave);
 
 var TMPLS={
