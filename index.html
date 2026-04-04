@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>GrappleMapper</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GrappleMapper">
 <meta name="theme-color" content="#343230">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
-<title>GrappleMapper</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -129,7 +127,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #cstatus{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;display:none;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
 #hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid var(--bord);padding:7px 18px;border-radius:22px;font-size:11px;color:var(--mut);pointer-events:none;white-space:nowrap;box-shadow:var(--sh);transition:opacity .4s}
 #arrow-label-editor{position:absolute;display:none;z-index:600}
-#arrow-label-editor input{border:none;background:#eceae6;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;color:#555;outline:none;width:120px;text-align:center;box-shadow:none;caret-color:#555;padding:2px 6px;border-radius:3px}
+#arrow-label-editor input{border:none;border-radius:4px;padding:3px 6px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#eceae6;color:#444;outline:none;width:120px;text-align:center;box-shadow:none;caret-color:#666}
 .ag.sel-arrow .ap{stroke:#666;stroke-width:3}
 #toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#1a1917;color:#fff;padding:8px 20px;border-radius:22px;font-size:12px;font-weight:500;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2);opacity:0;transition:opacity .25s;z-index:600}
 #ac-drop{position:absolute;left:0;right:0;top:100%;background:var(--dark2);border:1.5px solid var(--acc);border-radius:9px;box-shadow:var(--sh2);z-index:700;display:none;overflow:hidden;margin-top:2px;max-height:220px;overflow-y:auto}
@@ -139,9 +137,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .ac-item:hover,.ac-item.ac-active{background:rgba(107,70,193,.25)}
 .ac-item .ac-name{font-weight:500;color:var(--dtext)}
 .ac-item .ac-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;flex-shrink:0}
-
-#bar{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
-#layout{bottom:env(safe-area-inset-bottom);}
 </style>
 </head>
 <body>
@@ -154,7 +149,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v3.2</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v3.3</span>
   </div>
   <div class="sep"></div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
@@ -504,17 +499,15 @@ window.addEventListener('keydown',function(e){
 var aleArrowId=null;
 var aleInput=document.getElementById('ale-input');
 var aleDiv=document.getElementById('arrow-label-editor');
-function openALE(arrowId, canvasX, canvasY){
+function openALE(arrowId, screenX, screenY){
   aleArrowId=arrowId;
   var a=arrows.find(function(x){return x.id===arrowId;});
   aleInput.value=a?a.label||''  :'';
-  // canvasX/canvasY are SVG canvas coords — convert to wrap-relative screen px
+  // Place input centred exactly on the label position
   var inputW=120, inputH=22;
-  var wrapX=canvasX*sc+px;
-  var wrapY=canvasY*sc+py;
   aleDiv.style.display='block';
-  aleDiv.style.left=(wrapX-inputW/2)+'px';
-  aleDiv.style.top=(wrapY-inputH/2)+'px';
+  aleDiv.style.left=(screenX-inputW/2)+'px';
+  aleDiv.style.top=(screenY-inputH/2)+'px';
   setTimeout(function(){aleInput.focus();aleInput.select();},30);
 }
 function closeALE(save){
@@ -1204,7 +1197,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v3.2.gmap';
+  var filename=slug+'-v3.3.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -1298,17 +1291,7 @@ function exportPDF(){
     var svgStr=svgClone.outerHTML;
     var canvasStr=canvasClone.outerHTML;
 
-    var html='<!DOCTYPE html><html><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GrappleMapper">
-<meta name="theme-color" content="#343230">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">'
+    var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
       +'<title>'+title+'</title>'
       +'<link rel="preconnect" href="https://fonts.googleapis.com">'
       +'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">'
@@ -1340,10 +1323,7 @@ function exportPDF(){
       +'body{padding:10px}'
       +'@page{size:A3 landscape;margin:15mm}'
       +'}'
-      +'
-#bar{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
-#layout{bottom:env(safe-area-inset-bottom);}
-</style></head><body>'
+      +'</style></head><body>'
       +'<div class="header">'+title+'</div>'
       +'<div class="subheader">GrappleMapper v2.1 — exported '+new Date().toLocaleDateString()+'</div>'
       +'<div style="position:relative;width:'+mapW+'px;height:'+mapH+'px">'
@@ -1351,16 +1331,7 @@ function exportPDF(){
       +svgStr+canvasStr
       +'</div></div>'
       +'<script>window.onload=function(){window.print();}<\/script>'
-      +'<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js')
-      .then(function(r){console.log('SW:',r.scope);})
-      .catch(function(e){console.log('SW error:',e);});
-  });
-}
-</script>
-</body></html>';
+      +'</body></html>';
 
     printWin.document.write(html);
     printWin.document.close();
@@ -1445,8 +1416,8 @@ function loadTmpl(name){
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js')
-      .then(function(r){console.log('SW:',r.scope);})
-      .catch(function(e){console.log('SW error:',e);});
+      .then(function(r){console.log('SW registered:',r.scope);})
+      .catch(function(e){console.warn('SW skipped:',e);});
   });
 }
 </script>
