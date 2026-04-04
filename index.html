@@ -2,6 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GrappleMapper">
+<meta name="theme-color" content="#343230">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<!-- Viewport: allow pinch-zoom on canvas but prevent page bounce -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+
 <title>GrappleMapper</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
@@ -129,6 +142,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .ac-item:hover,.ac-item.ac-active{background:rgba(107,70,193,.25)}
 .ac-item .ac-name{font-weight:500;color:var(--dtext)}
 .ac-item .ac-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;flex-shrink:0}
+
+/* PWA / iPhone safe area */
+#bar{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
+body{padding-top:env(safe-area-inset-top);}
+#layout{bottom:env(safe-area-inset-bottom);}
 </style>
 </head>
 <body>
@@ -1285,7 +1303,20 @@ function exportPDF(){
     var svgStr=svgClone.outerHTML;
     var canvasStr=canvasClone.outerHTML;
 
-    var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    var html='<!DOCTYPE html><html><head><meta charset="UTF-8">
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GrappleMapper">
+<meta name="theme-color" content="#343230">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<!-- Viewport: allow pinch-zoom on canvas but prevent page bounce -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+'
       +'<title>'+title+'</title>'
       +'<link rel="preconnect" href="https://fonts.googleapis.com">'
       +'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">'
@@ -1317,7 +1348,12 @@ function exportPDF(){
       +'body{padding:10px}'
       +'@page{size:A3 landscape;margin:15mm}'
       +'}'
-      +'</style></head><body>'
+      +'
+/* PWA / iPhone safe area */
+#bar{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
+body{padding-top:env(safe-area-inset-top);}
+#layout{bottom:env(safe-area-inset-bottom);}
+</style></head><body>'
       +'<div class="header">'+title+'</div>'
       +'<div class="subheader">GrappleMapper v2.1 — exported '+new Date().toLocaleDateString()+'</div>'
       +'<div style="position:relative;width:'+mapW+'px;height:'+mapH+'px">'
@@ -1325,7 +1361,16 @@ function exportPDF(){
       +svgStr+canvasStr
       +'</div></div>'
       +'<script>window.onload=function(){window.print();}<\/script>'
-      +'</body></html>';
+      +'<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(reg){ console.log('SW registered:', reg.scope); })
+      .catch(function(e){ console.log('SW failed:', e); });
+  });
+}
+</script>
+</body></html>';
 
     printWin.document.write(html);
     printWin.document.close();
@@ -1405,6 +1450,15 @@ function loadTmpl(name){
   }
   applyT();
 })();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(reg){ console.log('SW registered:', reg.scope); })
+      .catch(function(e){ console.log('SW failed:', e); });
+  });
+}
 </script>
 </body>
 </html>
