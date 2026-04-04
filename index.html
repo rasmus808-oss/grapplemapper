@@ -492,6 +492,7 @@ window.addEventListener('keydown',function(e){
     if(selArrowId){ delArrow(selArrowId); return; }
     if(msel.size>0){[...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
     else if(selId) delNode(selId);
+    else if(armed){ var tmp=armed; disarm(); delNode(tmp); }
   }
 });
 
@@ -499,15 +500,21 @@ window.addEventListener('keydown',function(e){
 var aleArrowId=null;
 var aleInput=document.getElementById('ale-input');
 var aleDiv=document.getElementById('arrow-label-editor');
-function openALE(arrowId, screenX, screenY){
+function openALE(arrowId, canvasX, canvasY){
   aleArrowId=arrowId;
   var a=arrows.find(function(x){return x.id===arrowId;});
   aleInput.value=a?a.label||''  :'';
-  // Place input centred exactly on the label position
-  var inputW=120, inputH=22;
+  var inputW=120*sc, inputH=22*sc;
+  // Scale font to match SVG text at current zoom
+  aleInput.style.fontSize=(11*sc)+'px';
+  aleInput.style.width=(120*sc)+'px';
+  aleInput.style.padding=(2*sc)+'px '+(6*sc)+'px';
+  // Convert SVG canvas coords → wrap-relative px
+  var wrapX=canvasX*sc+px;
+  var wrapY=canvasY*sc+py;
   aleDiv.style.display='block';
-  aleDiv.style.left=(screenX-inputW/2)+'px';
-  aleDiv.style.top=(screenY-inputH/2)+'px';
+  aleDiv.style.left=(wrapX-inputW/2)+'px';
+  aleDiv.style.top=(wrapY-inputH/2)+'px';
   setTimeout(function(){aleInput.focus();aleInput.select();},30);
 }
 function closeALE(save){
