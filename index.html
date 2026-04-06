@@ -18,7 +18,7 @@
   --bg:#f0eeea;--surf:#fff;--bord:#e0ddd7;--bord2:#c8c5be;
   --text:#18170f;--mut:#8a8780;--acc:#6b46c1;--al:#ede9f8;
   --dan:#dc2626;
-  --dark:#343230;--dark2:#3d3b38;--dbord:#4a4845;--dbord2:#5a5855;--dtext:#e8e6df;--dmut:#9a9895;
+  --dark:#3e3c39;--dark2:#484643;--dbord:#4a4845;--dbord2:#5a5855;--dtext:#e8e6df;--dmut:#9a9895;
   --sh:0 2px 8px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.05);
   --sh2:0 8px 28px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.07);
 }
@@ -75,7 +75,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .nchip:hover{background:var(--acc);color:#fff}
 .nchip.loading{background:var(--dark2);color:var(--dmut);border-color:var(--dbord);cursor:default;animation:pulse .9s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
-#wrap{flex:1;position:relative;overflow:hidden;background:#eceae6}
+#wrap{flex:1;position:relative;overflow:hidden;background:#e2e0dc}
 #dotbg{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#b0ada6 1.2px,transparent 1.2px);background-size:24px 24px;opacity:.55}
 #canvas{position:absolute;top:0;left:0;transform-origin:0 0}
 .node{position:absolute;width:190px;background:var(--surf);border:1.5px solid var(--bord);border-radius:12px;box-shadow:var(--sh);cursor:pointer;user-select:none;transition:border-color .15s,box-shadow .15s,width .25s ease,border-radius .25s ease}
@@ -123,11 +123,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .node:hover .delbtn,.node.sel .delbtn,.node.msel .delbtn{display:flex}
 .delbtn:hover{background:var(--dan);border-color:var(--dan);color:#fff}
 #marquee{position:absolute;border:1.5px dashed var(--acc);background:rgba(107,70,193,.06);border-radius:3px;display:none;pointer-events:none;z-index:200}
-#badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;display:none;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
+#badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:5px 6px 5px 16px;border-radius:20px;font-size:12px;font-weight:600;display:none;white-space:nowrap;box-shadow:var(--sh2);display:none;align-items:center;gap:8px;cursor:default}
+#badge-del{background:rgba(255,255,255,.25);border:none;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+#badge-del:hover{background:rgba(255,255,255,.4)}
 #cstatus{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;display:none;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
 #hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid var(--bord);padding:7px 18px;border-radius:22px;font-size:11px;color:var(--mut);pointer-events:none;white-space:nowrap;box-shadow:var(--sh);transition:opacity .4s}
 #arrow-label-editor{position:absolute;display:none;z-index:600}
-#arrow-label-editor input{border:none;border-radius:4px;padding:3px 6px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#eceae6;color:#444;outline:none;width:120px;text-align:center;box-shadow:none;caret-color:#666}
+#arrow-label-editor input{border:none;border-radius:4px;padding:3px 6px;font-size:11px;font-style:italic;font-family:'Inter',sans-serif;background:#e2e0dc;color:#444;outline:none;width:120px;text-align:center;box-shadow:none;caret-color:#666}
 .ag.sel-arrow .ap{stroke:#666;stroke-width:3}
 #toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#1a1917;color:#fff;padding:8px 20px;border-radius:22px;font-size:12px;font-weight:500;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2);opacity:0;transition:opacity .25s;z-index:600}
 #ac-drop{position:absolute;left:0;right:0;top:100%;background:var(--dark2);border:1.5px solid var(--acc);border-radius:9px;box-shadow:var(--sh2);z-index:700;display:none;overflow:hidden;margin-top:2px;max-height:220px;overflow-y:auto}
@@ -149,7 +151,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v3.7</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.4</span>
   </div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sp"></div>
@@ -202,6 +204,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
         <div class="sl">Templates</div>
         <div style="display:flex;flex-direction:column;gap:6px">
           <button class="btn" style="text-align:left" onclick="loadTmpl('guard')">&#x1F4CB; Guard passing</button>
+          <button class="btn" style="text-align:left" onclick="loadTmpl('closed')">&#x1F4CB; Closed guard</button>
           <button class="btn" style="text-align:left" onclick="loadTmpl('half')">&#x1F4CB; Half guard</button>
           <button class="btn" style="text-align:left" onclick="loadTmpl('mount')">&#x1F4CB; Mount attacks</button>
         </div>
@@ -248,7 +251,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       </div>
     </div>
   </div>
-  <div id="wrap">
+  <div id="wrap" tabindex="-1" style="outline:none">
     <div id="dotbg"></div>
     <div id="canvas">
       <svg id="asvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none" width="1" height="1">
@@ -261,7 +264,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       </svg>
     </div>
     <div id="marquee"></div>
-    <div id="badge"></div>
+    <div id="badge"><span id="badge-txt"></span><button id="badge-del" onclick="deleteMsel()">Delete</button></div>
     <div id="cstatus"></div>
     <div id="arrow-label-editor"><input id="ale-input" placeholder="label..." /></div>
     <div id="toast"></div>
@@ -486,21 +489,27 @@ window.addEventListener('mouseup',function(e){
     msel.clear();
     Object.keys(nodes).forEach(function(id){if(document.getElementById(id).classList.contains('msel'))msel.add(id);});
     if(msel.size===1){var id=[...msel][0];msel.clear();document.getElementById(id).classList.remove('msel');selNode(id);}
-    else if(msel.size>1){var b=document.getElementById('badge');b.textContent=msel.size+' selected - Del to delete';b.style.display='block';desel();}
+    else if(msel.size>1){var b=document.getElementById('badge');document.getElementById('badge-txt').textContent=msel.size+' selected';b.style.display='flex';desel();}
     mqOn=false;mqSt=null;
+    // Force focus onto wrap so Backspace/Delete fires on a non-input element
+    wrap.focus();
   }
 });
-window.addEventListener('keydown',function(e){
+document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){ disarm(); deselectArrow(); }
   if(e.key==='z'&&(e.metaKey||e.ctrlKey)&&!e.shiftKey){e.preventDefault();undo();return;}
-  if((e.key==='Delete'||e.key==='Backspace')&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
-    e.preventDefault();
-    if(selArrowId){ snapshotForUndo(); delArrow(selArrowId); return; }
-    if(msel.size>0){ snapshotForUndo(); [...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
-    else if(selId){ snapshotForUndo(); delNode(selId); }
-    else if(armed){ snapshotForUndo(); var tmp=armed; disarm(); delNode(tmp); }
+  if((e.key==='Delete'||e.key==='Backspace')){
+    var t=e.target;
+    var isEditable=t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable;
+    if(!isEditable){
+      e.preventDefault();
+      if(selArrowId){ snapshotForUndo(); delArrow(selArrowId); return; }
+      if(msel.size>0){ deleteMsel(); return; }
+      if(selId){ snapshotForUndo(); delNode(selId); }
+      else if(armed){ snapshotForUndo(); var tmp=armed; disarm(); delNode(tmp); }
+    }
   }
-});
+},{capture:true});
 
 // Arrow label editor
 var aleArrowId=null;
@@ -603,7 +612,7 @@ function addArrow(from,to,label){
   txt.setAttribute('font-style','italic');txt.setAttribute('font-size','11');
   txt.setAttribute('fill','#666');txt.setAttribute('font-family','Inter,sans-serif');
   txt.setAttribute('paint-order','stroke');
-  txt.setAttribute('stroke','#eceae6');
+  txt.setAttribute('stroke','#e2e0dc');
   txt.setAttribute('stroke-width','4');
   txt.setAttribute('stroke-linejoin','round');
   txt.textContent=label;
@@ -861,7 +870,7 @@ function attachEv(el,id){
   el.querySelector('.delbtn').addEventListener('click',function(e){
     e.stopPropagation();
     snapshotForUndo();
-    if(msel.size>1&&msel.has(id)){[...msel].forEach(function(i){delNode(i);});msel.clear();document.getElementById('badge').style.display='none';}
+    if(msel.size>1&&msel.has(id)){deleteMsel();}
     else delNode(id);
   });
 }
@@ -878,8 +887,15 @@ function delNode(id){
   msel.delete(id);
   autoSave();
 }
+function deleteMsel(){
+  if(!msel.size) return;
+  snapshotForUndo();
+  [...msel].forEach(function(id){delNode(id);});
+  msel.clear();
+  document.getElementById('badge').style.display='none';
+}
 function delSelected(){
-  if(msel.size>0){[...msel].forEach(function(id){delNode(id);});msel.clear();document.getElementById('badge').style.display='none';}
+  if(msel.size>0){deleteMsel();}
   else if(selId) delNode(selId);
 }
 function selNode(id){
@@ -1213,7 +1229,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v3.7.gmap';
+  var filename=slug+'-v4.4.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -1409,44 +1425,67 @@ function exportPDF(){
 var TMPLS={
   guard:{title:'Open Guard Passing System',
     nodes:[
-      {id:'n1',x:290,y:20, type:'position',  label:'Open guard',       desc:'Opponent in seated open guard.'},
-      {id:'n2',x:60, y:210,type:'pass',       label:'Torreando pass',   desc:'Control ankles, bullfight legs to the side.'},
-      {id:'n3',x:290,y:210,type:'pass',       label:'Knee cut pass',    desc:'Slice knee through to flatten the guard.'},
-      {id:'n4',x:520,y:210,type:'pass',       label:'Leg drag',         desc:'Drag far leg, drive shoulder into hip.'},
-      {id:'n5',x:60, y:400,type:'position',   label:'Side control',     desc:'Heavy cross-face and hip pressure.'},
-      {id:'n6',x:290,y:400,type:'position',   label:'Half guard (top)', desc:'Opponent recovers half guard.'},
-      {id:'n7',x:520,y:400,type:'position',   label:'Back mount',       desc:'Seat belt grip, establish hooks.'},
-      {id:'n8',x:160,y:590,type:'position',   label:'Mount',            desc:'Walk knees up into high mount.'},
-      {id:'n9',x:390,y:590,type:'submission', label:'Armbar',           desc:'Break posture and attack the armbar.'},
+      {id:'n1',x:370, y:30,  type:'position',  label:'Open guard',       desc:'Opponent in seated open guard.'},
+      {id:'n2',x:60,  y:280, type:'pass',       label:'Torreando pass',   desc:'Control ankles, bullfight legs to the side.'},
+      {id:'n3',x:370, y:280, type:'pass',       label:'Knee cut pass',    desc:'Slice knee through to flatten the guard.'},
+      {id:'n4',x:680, y:280, type:'pass',       label:'Leg drag',         desc:'Drag far leg, drive shoulder into hip.'},
+      {id:'n5',x:60,  y:530, type:'position',   label:'Side control',     desc:'Heavy cross-face and hip pressure.'},
+      {id:'n6',x:370, y:530, type:'position',   label:'Half guard (top)', desc:'Opponent recovers half guard.'},
+      {id:'n7',x:680, y:530, type:'position',   label:'Back mount',       desc:'Seat belt grip, establish hooks.'},
+      {id:'n8',x:190, y:780, type:'position',   label:'Mount',            desc:'Walk knees up into high mount.'},
+      {id:'n9',x:500, y:780, type:'submission', label:'Armbar',           desc:'Break posture and attack the armbar.'},
     ],
     arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n8'],['n7','n9'],['n8','n9']],
   },
   half:{title:'Half Guard System',
     nodes:[
-      {id:'n1',x:260,y:20, type:'position',   label:'Half guard',           desc:'Battle for underhook or deep half.'},
-      {id:'n2',x:40, y:210,type:'position',   label:'Deep half guard',      desc:'Dive under for better leverage.'},
-      {id:'n3',x:260,y:210,type:'sweep',      label:'Old school sweep',     desc:'Grab back of knee, sit up and shrimp.'},
-      {id:'n4',x:480,y:210,type:'submission', label:'Kimura trap',          desc:'Trap wrist in kimura grip.'},
-      {id:'n5',x:40, y:400,type:'position',   label:'Back take',            desc:'Roll toward back, establish hooks.'},
-      {id:'n6',x:260,y:400,type:'position',   label:'Top half guard',       desc:'Sweep succeeded, drive to pass.'},
-      {id:'n7',x:480,y:400,type:'submission', label:'Kimura',               desc:'Rotate shoulder, extend, finish.'},
-      {id:'n8',x:130,y:590,type:'submission', label:'Rear naked choke',     desc:'Seat belt, slide choke and squeeze.'},
-      {id:'n9',x:350,y:590,type:'pass',       label:'Pass to side control', desc:'Drive through half guard leg.'},
+      {id:'n1',x:340, y:30,  type:'position',   label:'Half guard',           desc:'Battle for underhook or deep half.'},
+      {id:'n2',x:60,  y:280, type:'position',   label:'Deep half guard',      desc:'Dive under for better leverage.'},
+      {id:'n3',x:340, y:280, type:'sweep',      label:'Old school sweep',     desc:'Grab back of knee, sit up and shrimp.'},
+      {id:'n4',x:640, y:280, type:'submission', label:'Kimura trap',          desc:'Trap wrist in kimura grip.'},
+      {id:'n5',x:60,  y:530, type:'position',   label:'Back take',            desc:'Roll toward back, establish hooks.'},
+      {id:'n6',x:340, y:530, type:'position',   label:'Top half guard',       desc:'Sweep succeeded, drive to pass.'},
+      {id:'n7',x:640, y:530, type:'submission', label:'Kimura',               desc:'Rotate shoulder, extend, finish.'},
+      {id:'n8',x:170, y:780, type:'submission', label:'Rear naked choke',     desc:'Seat belt, slide choke and squeeze.'},
+      {id:'n9',x:470, y:780, type:'pass',       label:'Pass to side control', desc:'Drive through half guard leg.'},
     ],
     arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n9'],['n7','n8']],
   },
   mount:{title:'Mount Attack Tree',
     nodes:[
-      {id:'n1',x:250,y:20, type:'position',   label:'Low mount',          desc:'Establish base, hook the hips.'},
-      {id:'n2',x:60, y:210,type:'position',   label:'High mount',         desc:'Walk knees up to armpits.'},
-      {id:'n3',x:440,y:210,type:'position',   label:'S-mount',            desc:'Rotate to isolate arm for armbar.'},
-      {id:'n4',x:20, y:400,type:'submission', label:'Cross collar choke', desc:'Four fingers deep, drive second hand.'},
-      {id:'n5',x:200,y:400,type:'submission', label:'Ezekiel choke',      desc:'Sleeve choke using forearm.'},
-      {id:'n6',x:390,y:400,type:'submission', label:'Armbar',             desc:'Step over head, extend the elbow.'},
-      {id:'n7',x:100,y:590,type:'submission', label:'Triangle choke',     desc:'Leg over, lock triangle.'},
-      {id:'n8',x:320,y:590,type:'submission', label:'Omoplata',           desc:'Hip escape, shoulder lock.'},
+      {id:'n1',x:330, y:30,  type:'position',   label:'Low mount',          desc:'Establish base, hook the hips.'},
+      {id:'n2',x:80,  y:280, type:'position',   label:'High mount',         desc:'Walk knees up to armpits.'},
+      {id:'n3',x:580, y:280, type:'position',   label:'S-mount',            desc:'Rotate to isolate arm for armbar.'},
+      {id:'n4',x:20,  y:530, type:'submission', label:'Cross collar choke', desc:'Four fingers deep, drive second hand.'},
+      {id:'n5',x:260, y:530, type:'submission', label:'Ezekiel choke',      desc:'Sleeve choke using forearm.'},
+      {id:'n6',x:500, y:530, type:'submission', label:'Armbar',             desc:'Step over head, extend the elbow.'},
+      {id:'n7',x:130, y:780, type:'submission', label:'Triangle choke',     desc:'Leg over, lock triangle.'},
+      {id:'n8',x:420, y:780, type:'submission', label:'Omoplata',           desc:'Hip escape, shoulder lock.'},
     ],
     arrows:[['n1','n2'],['n1','n3'],['n2','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n7'],['n6','n8']],
+  },
+  closed:{title:'Closed Guard Attacks',
+    nodes:[
+      {id:'n1', x:350, y:30,  type:'position',   label:'Closed guard',     desc:'Break posture, control sleeves and collar.'},
+      {id:'n2', x:30,  y:280, type:'sweep',       label:'Hip bump sweep',   desc:'Sit up, post hand, drive hip into opponent.'},
+      {id:'n3', x:330, y:280, type:'sweep',       label:'Scissor sweep',    desc:'Knee across belly, foot on hip, pull and push.'},
+      {id:'n4', x:630, y:280, type:'sweep',       label:'Pendulum sweep',   desc:'Overhook arm, foot on hip, pendulum leg.'},
+      {id:'n5', x:30,  y:530, type:'submission',  label:'Kimura',           desc:'Trap wrist, figure-four grip, rotate shoulder.'},
+      {id:'n6', x:250, y:530, type:'submission',  label:'Guillotine',       desc:'Head control, arm around neck, arch and squeeze.'},
+      {id:'n7', x:470, y:530, type:'submission',  label:'Triangle choke',   desc:'Angle off, figure-four legs, squeeze.'},
+      {id:'n8', x:690, y:530, type:'submission',  label:'Omoplata',         desc:'Hip escape, leg over shoulder, rotate.'},
+      {id:'n9', x:30,  y:780, type:'transition',  label:'Back take',        desc:'Opponent postures — go to back.'},
+      {id:'n10',x:250, y:780, type:'position',    label:'Mount',            desc:'Opponent bridges — transition to mount.'},
+      {id:'n11',x:470, y:780, type:'submission',  label:'Armbar',           desc:'Break posture, step over head, extend.'},
+      {id:'n12',x:690, y:780, type:'escape',      label:'Guard retention',  desc:'Opponent stands — control ankles, reguard.'},
+    ],
+    arrows:[
+      ['n1','n2'],['n1','n3'],['n1','n4'],
+      ['n1','n5'],['n1','n6'],['n1','n7'],['n1','n8'],
+      ['n2','n10'],['n3','n10'],['n4','n10'],
+      ['n5','n9'],['n6','n11'],['n7','n11'],['n8','n9'],
+      ['n1','n12'],
+    ],
   },
 };
 function loadTmpl(name){
