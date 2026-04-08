@@ -125,8 +125,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .delbtn:hover{background:var(--dan);border-color:var(--dan);color:#fff}
 #marquee{position:absolute;border:1.5px dashed var(--acc);background:rgba(107,70,193,.06);border-radius:3px;display:none;pointer-events:none;z-index:200}
 #group-marquee{position:absolute;border:2px dashed #06b6d4;background:rgba(6,182,212,.06);border-radius:6px;display:none;pointer-events:none;z-index:199}
+#note-marquee{position:absolute;border:2px dashed #b8a060;background:rgba(255,240,180,.1);border-radius:4px;display:none;pointer-events:none;z-index:199}
+.note-el{position:absolute;background:#fffde7;border:1px solid #e8d87a;border-radius:6px;box-shadow:2px 3px 8px rgba(0,0,0,.10);cursor:default;user-select:none;min-width:140px;min-height:80px;}
+.note-el .note-drag-bar{height:18px;background:#f5e97a;border-radius:5px 5px 0 0;cursor:move;display:flex;align-items:center;padding:0 6px;gap:4px}
+.note-el .note-drag-bar svg{opacity:.5;flex-shrink:0}
+.note-el .note-body{padding:6px 8px;font-size:11px;line-height:1.55;color:#5a4e00;white-space:pre-wrap;word-break:break-word;min-height:60px;outline:none;cursor:text;}
+#note-label-editor{position:absolute;display:none;z-index:602}
+#note-label-editor textarea{border:1.5px solid #b8a060;border-radius:6px;padding:5px 8px;font-size:11px;font-family:'Inter',sans-serif;background:#fffde7;color:#5a4e00;outline:none;resize:none;width:200px;min-height:80px;box-shadow:2px 3px 8px rgba(0,0,0,.12);line-height:1.55;caret-color:#b8a060}
 #group-label-editor input{border:none;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600;font-family:'Space Grotesk','Inter',sans-serif;background:rgba(6,182,212,.15);color:#0e7490;outline:1.5px solid #06b6d4;width:120px;text-align:center;box-shadow:none;caret-color:#06b6d4}
 .group-btn-active{background:rgba(6,182,212,.18)!important;border-color:#06b6d4!important;color:#06b6d4!important}
+.note-btn-active{background:rgba(184,160,96,.18)!important;border-color:#b8a060!important;color:#b8a060!important}
 #badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:5px 6px 5px 16px;border-radius:20px;font-size:12px;font-weight:600;display:none;white-space:nowrap;box-shadow:var(--sh2);display:none;align-items:center;gap:8px;cursor:default}
 #badge-del{background:rgba(255,255,255,.25);border:none;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 #badge-del:hover{background:rgba(255,255,255,.4)}
@@ -180,6 +188,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
   <!-- Group -->
   <button class="icon-btn" id="group-btn" onclick="startGroupMode()" title="Draw a group box (drag to create)">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="4,2.5" fill="none"/><line x1="3" y1="8" x2="21" y2="8"/></svg>
+  </button>
+  <!-- Note -->
+  <button class="icon-btn" id="note-btn" onclick="startNoteMode()" title="Draw a note (drag to create)">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none"/><polyline points="14 2 14 8 20 8" fill="none"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
   </button>
   </div>
   <div class="sep"></div>
@@ -276,7 +288,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
     </div>
     <div id="marquee"></div>
     <div id="group-marquee"></div>
+    <div id="note-marquee"></div>
     <div id="group-label-editor" style="position:absolute;display:none;z-index:601"><input id="gle-input" placeholder="Group name…" autocomplete="off"></div>
+    <div id="note-label-editor"><textarea id="nle-input" placeholder="Write your note…"></textarea></div>
     <div id="badge"><span id="badge-txt"></span><button id="badge-del" onclick="deleteMsel()">Delete</button></div>
     <div id="cstatus"></div>
     <div id="arrow-label-editor"><input id="ale-input" placeholder="label..." /></div>
@@ -318,7 +332,7 @@ const SAMPLES={
   transition:['Back take','Guard recovery','Stand up','Sit out','Switch hips','Granby roll','Sit to turtle','Turtle to guard','Half to full guard','Side control to mount'],
 };
 
-let nodes={}, arrows=[], groups=[], nid=0, aid=0, gid=0;
+let nodes={}, arrows=[], groups=[], notes=[], nid=0, aid=0, gid=0, noid=0;
 let sc=1, px=60, py=50;
 let armed=null;
 let selId=null, msel=new Set(), mselGroups=new Set();
@@ -326,8 +340,12 @@ let selArrowId=null;
 let dragId=null, dragOff={x:0,y:0}, dragging=false;
 let mqOn=false, mqSt=null;
 let grpMode=false, grpSt=null; // group-draw state
+let noteMode=false, noteSt=null; // note-draw state
 let selGroupId=null;           // selected group (shows resize handles)
+let selNoteId=null;            // selected note
 let grpResizing=null;          // {id, edge} while dragging a handle
+let noteResizing=null;         // {id, edge} while dragging a note handle
+let noteDragging=null;         // {id, offX, offY} while dragging note body
 let curType='position', curColor='#6b46c1', curBg='#ede9f8';
 let urlTimer=null;
 
@@ -346,6 +364,13 @@ function parseIG(url){
   if(!url) return null;
   const m=url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
   return m?m[1]:null;
+}
+function parseFB(url){
+  if(!url) return null;
+  // facebook.com/watch?v=ID  or  facebook.com/*/videos/ID  or  fb.watch/CODE
+  const m=url.match(/(?:facebook\.com\/(?:watch\/?\?v=|[^/]+\/videos\/)(\d+)|fb\.watch\/([A-Za-z0-9_-]+))/);
+  if(!m) return null;
+  return m[1]||m[2]||null;
 }
 // Inject Instagram embed.js once
 var igScriptLoaded=false;
@@ -465,15 +490,22 @@ function toC(cx,cy){var r=wrap.getBoundingClientRect();return{x:(cx-r.left-px)/s
 // Canvas background events
 wrap.addEventListener('mousedown',function(e){
   if(e.target.closest && e.target.closest('.node')) return;
+  if(e.target.closest && e.target.closest('.note-el')) return;
   if(grpMode){
-    // Group draw — start drag
     var c=toC(e.clientX,e.clientY);
     grpSt={x:c.x,y:c.y};
     document.getElementById('group-marquee').style.display='block';
     e.preventDefault();
     return;
   }
-  deselectGroup();
+  if(noteMode){
+    var c=toC(e.clientX,e.clientY);
+    noteSt={x:c.x,y:c.y};
+    document.getElementById('note-marquee').style.display='block';
+    e.preventDefault();
+    return;
+  }
+  deselectGroup(); deselectNote();
   if(armed){disarm();return;}
   deselectArrow();
   var bg=e.target===wrap||e.target===canvas||e.target.id==='dotbg'||e.target===asvg||e.target.tagName==='svg';
@@ -489,6 +521,28 @@ wrap.addEventListener('dblclick',function(e){
   if(bg){snapshotForUndo();var c=toC(e.clientX,e.clientY);addNode(c.x-95,c.y-55);hideHint();}
 });
 window.addEventListener('mousemove',function(e){
+  // ── Note resize ──
+  if(noteResizing){
+    var c=toC(e.clientX,e.clientY);
+    var no=notes.find(function(x){return x.id===noteResizing.id;}); if(!no){noteResizing=null;return;}
+    var MIN=80;
+    switch(noteResizing.edge){
+      case 'top':    var ny=Math.min(c.y,no.y+no.h-MIN); no.h=no.h+(no.y-ny); no.y=ny; break;
+      case 'bottom': no.h=Math.max(MIN,c.y-no.y); break;
+      case 'left':   var nx=Math.min(c.x,no.x+no.w-MIN); no.w=no.w+(no.x-nx); no.x=nx; break;
+      case 'right':  no.w=Math.max(MIN,c.x-no.x); break;
+    }
+    renderNote(no); return;
+  }
+  // ── Note drag ──
+  if(noteDragging){
+    var c=toC(e.clientX,e.clientY);
+    var no=notes.find(function(x){return x.id===noteDragging.id;}); if(!no){noteDragging=null;return;}
+    no.x=c.x-noteDragging.offX; no.y=c.y-noteDragging.offY;
+    var el=document.getElementById(no.id);
+    if(el){el.style.left=no.x+'px'; el.style.top=no.y+'px';}
+    return;
+  }
   // ── Group resize drag ──
   if(grpResizing){
     var c=toC(e.clientX,e.clientY);
@@ -559,6 +613,16 @@ window.addEventListener('mousemove',function(e){
     }
     return;
   }
+  if(noteMode&&noteSt){
+    var c=toC(e.clientX,e.clientY);
+    var nx=Math.min(noteSt.x,c.x), ny=Math.min(noteSt.y,c.y);
+    var nw=Math.abs(c.x-noteSt.x), nh=Math.abs(c.y-noteSt.y);
+    if(nw>5||nh>5){
+      var nm=document.getElementById('note-marquee');
+      nm.style.cssText='display:block;left:'+(nx*sc+px)+'px;top:'+(ny*sc+py)+'px;width:'+(nw*sc)+'px;height:'+(nh*sc)+'px';
+    }
+    return;
+  }
   if(mqOn&&mqSt){
     var c=toC(e.clientX,e.clientY);
     var mx=Math.min(mqSt.x,c.x), my=Math.min(mqSt.y,c.y);
@@ -587,6 +651,10 @@ window.addEventListener('mousemove',function(e){
 });
 window.addEventListener('mouseup',function(e){
   if(dragId){dragId=null;dragging=false;}
+  // ── Commit note resize ──
+  if(noteResizing){ noteResizing=null; autoSave(); return; }
+  // ── Commit note drag ──
+  if(noteDragging){ noteDragging=null; autoSave(); return; }
   // ── Commit group resize ──
   if(grpResizing){
     grpResizing=null;
@@ -607,6 +675,18 @@ window.addEventListener('mouseup',function(e){
     grpMode=false;
     var btn=document.getElementById('group-btn');
     if(btn) btn.classList.remove('group-btn-active');
+    return;
+  }
+  if(noteMode&&noteSt){
+    var c=toC(e.clientX,e.clientY);
+    var nx=Math.min(noteSt.x,c.x), ny=Math.min(noteSt.y,c.y);
+    var nw=Math.abs(c.x-noteSt.x), nh=Math.abs(c.y-noteSt.y);
+    document.getElementById('note-marquee').style.display='none';
+    noteSt=null;
+    if(nw>40&&nh>30){ snapshotForUndo(); addNote(nx,ny,nw,nh); }
+    noteMode=false;
+    var nbtn=document.getElementById('note-btn');
+    if(nbtn) nbtn.classList.remove('note-btn-active');
     return;
   }
   if(mqOn){
@@ -643,8 +723,9 @@ window.addEventListener('mouseup',function(e){
 });
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
-    disarm(); deselectArrow(); deselectGroup();
+    disarm(); deselectArrow(); deselectGroup(); deselectNote();
     if(grpMode){ grpMode=false; grpSt=null; document.getElementById('group-marquee').style.display='none'; document.getElementById('group-btn').classList.remove('group-btn-active'); }
+    if(noteMode){ noteMode=false; noteSt=null; document.getElementById('note-marquee').style.display='none'; var nb=document.getElementById('note-btn'); if(nb) nb.classList.remove('note-btn-active'); }
   }
   if(e.key==='z'&&(e.metaKey||e.ctrlKey)&&!e.shiftKey){e.preventDefault();undo();return;}
   if((e.key==='Delete'||e.key==='Backspace')){
@@ -655,6 +736,7 @@ document.addEventListener('keydown',function(e){
       if(selArrowId){ snapshotForUndo(); delArrow(selArrowId); return; }
       if(msel.size>0||mselGroups.size>0){ deleteMsel(); return; }
       if(selGroupId){ snapshotForUndo(); delGroup(selGroupId); return; }
+      if(selNoteId){ snapshotForUndo(); delNote(selNoteId); return; }
       if(selId){ snapshotForUndo(); delNode(selId); }
       else if(armed){ snapshotForUndo(); var tmp=armed; disarm(); delNode(tmp); }
     }
@@ -832,7 +914,7 @@ function delArrow(id){
 // Arm/disarm
 function arm(id){
   disarm();
-  deselectGroup();
+  deselectGroup(); deselectNote();
   armed=id;
   document.getElementById(id).classList.add('armed');
   cstatus.textContent='Armed: '+nodes[id].label+' - now click another node';
@@ -862,7 +944,8 @@ function mkNodeEl(id){
   var isPos=(n.type==='position');
   var ytId=parseYT(n.url);
   var igId=parseIG(n.url);
-  var hasVideo=!!(ytId||igId);
+  var fbId=parseFB(n.url);
+  var hasVideo=!!(ytId||igId||fbId);
 
   // Determine aspect ratio from stored oEmbed dims, fallback to defaults
   // videoW/videoH come from oEmbed; for Shorts YT returns e.g. 480x270 but URL pattern tells us it's a short
@@ -911,6 +994,12 @@ function mkNodeEl(id){
       media='<div class="nvthumb portrait" style="background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
         +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>'
         +'<span style="color:#fff;font-size:11px;font-weight:600">Instagram Reel</span>'
+        +'<span style="color:rgba(255,255,255,.8);font-size:10px">Click to open &#x2197;</span>'
+        +'</div>';
+    } else if(fbId){
+      media='<div class="nvthumb" style="background:linear-gradient(135deg,#1877f2 0%,#0d5fd8 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
+        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+        +'<span style="color:#fff;font-size:11px;font-weight:600">Facebook Video</span>'
         +'<span style="color:rgba(255,255,255,.8);font-size:10px">Click to open &#x2197;</span>'
         +'</div>';
     }
@@ -962,6 +1051,8 @@ function attachEv(el,id){
       var igId=parseIG(nodes[id].url);
       if(igId){
         window.open('https://www.instagram.com/p/'+igId+'/', '_blank');
+      } else if(parseFB(nodes[id].url)){
+        window.open(nodes[id].url, '_blank');
       } else {
         // Save pre-play dimensions
         var elNow=document.getElementById(id);
@@ -1097,7 +1188,11 @@ function updN(field,val){
   if(!selId) return; nodes[selId][field]=val;
   var el=document.getElementById(selId); if(!el) return;
   if(field==='label'){var t=el.querySelector('.ntitle');if(t)t.textContent=val;}
-  if(field==='desc'){var d=el.querySelector('.ndesc');if(d)d.textContent=val;}
+  if(field==='desc'){
+    var d=el.querySelector('.ndesc');
+    if(d){ d.textContent=val; }
+    else { refreshNode(selId); } // node had no desc div — re-render
+  }
 }
 function onUrl(val){
   if(!selId) return; nodes[selId].url=val;
@@ -1208,7 +1303,8 @@ function clearAll(){
   Object.keys(nodes).forEach(function(id){var el=document.getElementById(id);if(el)el.remove();});
   asvg.querySelectorAll('g').forEach(function(g){g.remove();});
   asvg.appendChild(pline);
-  nodes={};arrows=[];groups=[];nid=0;aid=0;gid=0;selId=null;msel.clear();disarm();
+  document.querySelectorAll('.note-el').forEach(function(el){el.remove();});
+  nodes={};arrows=[];groups=[];notes=[];nid=0;aid=0;gid=0;noid=0;selId=null;msel.clear();disarm();
   document.getElementById('detail').classList.remove('on');
   document.getElementById('badge').style.display='none';
   autoSave();
@@ -1216,6 +1312,164 @@ function clearAll(){
 var hintGone=false;
 function hideHint(){if(hintGone)return;hintGone=true;var h=document.getElementById('hint');if(h){h.style.opacity='0';setTimeout(function(){h.remove();},500);}}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── NOTE SYSTEM ──
+// notes[] items: {id, x, y, w, h, text}
+
+function startNoteMode(){
+  noteMode=!noteMode;
+  var btn=document.getElementById('note-btn');
+  if(noteMode){
+    btn.classList.add('note-btn-active');
+    showToast('Drag on canvas to draw a note');
+  } else {
+    btn.classList.remove('note-btn-active');
+    document.getElementById('note-marquee').style.display='none';
+  }
+}
+
+function renderNote(no){
+  var old=document.getElementById(no.id); if(old) old.remove();
+  var isSel=(selNoteId===no.id);
+
+  // Notes render as HTML divs on the canvas (not SVG)
+  var el=document.createElement('div');
+  el.id=no.id;
+  el.className='note-el';
+  el.style.left=no.x+'px'; el.style.top=no.y+'px';
+  el.style.width=no.w+'px'; el.style.height=no.h+'px';
+  if(isSel) el.style.boxShadow='0 0 0 2px #b8a060, 2px 3px 8px rgba(0,0,0,.12)';
+
+  // Drag bar at top
+  el.innerHTML='<div class="note-drag-bar"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#5a4e00" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="4" x2="10" y2="4"/><line x1="2" y1="7" x2="10" y2="7"/></svg></div>'
+    +'<div class="note-body" id="nb-'+no.id+'">'+escNote(no.text)+'</div>';
+
+  // If selected, add resize handles
+  if(isSel){
+    var HR=7, handleData=[
+      {edge:'top',    style:'top:'+(-HR)+'px;left:50%;transform:translateX(-50%);cursor:ns-resize'},
+      {edge:'bottom', style:'bottom:'+(-HR)+'px;left:50%;transform:translateX(-50%);cursor:ns-resize'},
+      {edge:'left',   style:'left:'+(-HR)+'px;top:50%;transform:translateY(-50%);cursor:ew-resize'},
+      {edge:'right',  style:'right:'+(-HR)+'px;top:50%;transform:translateY(-50%);cursor:ew-resize'},
+    ];
+    handleData.forEach(function(h){
+      var hel=document.createElement('div');
+      hel.style.cssText='position:absolute;width:'+HR*2+'px;height:'+HR*2+'px;border-radius:50%;background:#fff;border:2px solid #b8a060;z-index:10;'+h.style;
+      hel.dataset.edge=h.edge;
+      hel.addEventListener('mousedown',function(e){
+        e.stopPropagation(); e.preventDefault();
+        snapshotForUndo();
+        noteResizing={id:no.id, edge:h.edge, origX:no.x, origY:no.y, origW:no.w, origH:no.h, startCx:toC(e.clientX,e.clientY).x, startCy:toC(e.clientX,e.clientY).y};
+      });
+      el.appendChild(hel);
+    });
+    // Move handle (drag bar)
+    el.querySelector('.note-drag-bar').style.cursor='move';
+  }
+
+  // Drag bar → move note
+  el.querySelector('.note-drag-bar').addEventListener('mousedown',function(e){
+    if(e.target.closest('[data-edge]')) return;
+    e.stopPropagation(); e.preventDefault();
+    selectNote(no.id);
+    snapshotForUndo();
+    var c=toC(e.clientX,e.clientY);
+    noteDragging={id:no.id, offX:c.x-no.x, offY:c.y-no.y};
+  });
+
+  // Body click → select, dblclick → edit inline
+  el.querySelector('.note-body').addEventListener('click',function(e){
+    e.stopPropagation(); selectNote(no.id);
+  });
+  el.querySelector('.note-body').addEventListener('dblclick',function(e){
+    e.stopPropagation(); openNLE(no.id);
+  });
+
+  // Right-click → delete
+  el.addEventListener('contextmenu',function(e){
+    e.preventDefault(); e.stopPropagation();
+    if(confirm('Delete this note?')){ snapshotForUndo(); delNote(no.id); }
+  });
+
+  canvas.appendChild(el);
+}
+
+function escNote(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addNote(x,y,w,h){
+  var id='no'+(++noid);
+  var no={id:id,x:x,y:y,w:Math.max(140,w),h:Math.max(80,h),text:''};
+  notes.push(no);
+  renderNote(no);
+  autoSave();
+  openNLE(id);
+  return id;
+}
+
+function delNote(id){
+  notes=notes.filter(function(n){return n.id!==id;});
+  var el=document.getElementById(id); if(el) el.remove();
+  if(selNoteId===id) selNoteId=null;
+  autoSave();
+}
+
+function selectNote(id){
+  if(selNoteId===id) return;
+  deselectNote();
+  selNoteId=id;
+  disarm(); desel(); deselectArrow(); deselectGroup();
+  var no=notes.find(function(x){return x.id===id;}); if(!no) return;
+  renderNote(no);
+}
+
+function deselectNote(){
+  if(!selNoteId) return;
+  var no=notes.find(function(x){return x.id===selNoteId;});
+  selNoteId=null;
+  if(no) renderNote(no);
+}
+
+function openNLE(noteId){
+  var no=notes.find(function(x){return x.id===noteId;}); if(!no) return;
+  var nleDiv=document.getElementById('note-label-editor');
+  var nle=document.getElementById('nle-input');
+  nle.value=no.text||'';
+  // Position over the note body
+  var el=document.getElementById(noteId);
+  if(!el) return;
+  var barH=18;
+  var nx=no.x*sc+px, ny=(no.y+barH)*sc+py;
+  nleDiv.style.left=nx+'px'; nleDiv.style.top=ny+'px';
+  nleDiv.style.display='block';
+  nle.style.width=(no.w*sc)+'px';
+  nle.style.height=((no.h-barH)*sc)+'px';
+  nle.style.fontSize=(11*sc)+'px';
+  nleDiv._nid=noteId;
+  setTimeout(function(){nle.focus();},20);
+}
+
+function closeNLE(save){
+  var nleDiv=document.getElementById('note-label-editor');
+  if(save&&nleDiv._nid){
+    var no=notes.find(function(x){return x.id===nleDiv._nid;});
+    if(no){
+      no.text=document.getElementById('nle-input').value||'';
+      renderNote(no); autoSave();
+    }
+  }
+  nleDiv.style.display='none'; nleDiv._nid=null;
+}
+
+(function(){
+  var nle=document.getElementById('nle-input');
+  nle.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){closeNLE(true); e.stopPropagation();}
+    else e.stopPropagation(); // let Enter create newlines
+  });
+  nle.addEventListener('blur',function(){closeNLE(true);});
+})();
+
+// ── END NOTE SYSTEM ──
 
 // ── GROUP SYSTEM ──
 // groups[] items: {id, x, y, w, h, label, color}
@@ -1747,7 +2001,8 @@ function getMapState(){
     }),
     arrows:arrows.map(function(a){return {id:a.id,from:a.from,to:a.to,label:a.label||''};}),
     groups:groups.map(function(g){return {id:g.id,x:g.x,y:g.y,w:g.w,h:g.h,label:g.label,color:g.color};}),
-    nid:nid, aid:aid, gid:gid
+    notes:notes.map(function(n){return {id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,text:n.text};}),
+    nid:nid, aid:aid, gid:gid, noid:noid
   };
 }
 
@@ -1760,13 +2015,24 @@ function restoreMapState(state, skipConfirm){
   Object.keys(nodes).forEach(function(id){var el=document.getElementById(id);if(el)el.remove();});
   asvg.querySelectorAll('g').forEach(function(g){g.remove();});
   asvg.appendChild(pline);
-  nodes={};arrows=[];groups=[];selId=null;msel.clear();deselectArrow();disarm();
-  selGroupId=null; grpResizing=null;
+  document.querySelectorAll('.note-el').forEach(function(el){el.remove();});
+  nodes={};arrows=[];groups=[];notes=[];selId=null;msel.clear();deselectArrow();disarm();
+  selGroupId=null; grpResizing=null; selNoteId=null; noteResizing=null; noteDragging=null;
   document.getElementById('detail').classList.remove('on');
   document.getElementById('badge').style.display='none';
 
   document.getElementById('ftitle').value=state.title||'My BJJ System';
-  nid=state.nid||0; aid=state.aid||0; gid=state.gid||0;
+  nid=state.nid||0; aid=state.aid||0; gid=state.gid||0; noid=state.noid||0;
+
+  // Restore notes
+  notes=[];
+  document.querySelectorAll('.note-el').forEach(function(el){el.remove();});
+  if(state.notes&&state.notes.length){
+    state.notes.forEach(function(n){
+      notes.push({id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,text:n.text||''});
+      renderNote(notes[notes.length-1]);
+    });
+  }
 
   // Restore groups
   groups=[];
@@ -1834,7 +2100,8 @@ function snapshotForUndo(){
     nodes:Object.values(nodes).map(function(n){return JSON.parse(JSON.stringify(n));}),
     arrows:JSON.parse(JSON.stringify(arrows)),
     groups:JSON.parse(JSON.stringify(groups)),
-    nid:nid, aid:aid, gid:gid,
+    notes:JSON.parse(JSON.stringify(notes)),
+    nid:nid, aid:aid, gid:gid, noid:noid,
     title:document.getElementById('ftitle').value
   };
   _undoStack.push(snap);
@@ -1852,14 +2119,24 @@ function undo(){
   Object.keys(nodes).forEach(function(id){var el=document.getElementById(id);if(el)el.remove();});
   asvg.querySelectorAll('g').forEach(function(g){g.remove();});
   asvg.appendChild(pline);
-  nodes={};arrows=[];groups=[];selId=null;msel.clear();deselectArrow();disarm();
-  selGroupId=null; grpResizing=null;
+  document.querySelectorAll('.note-el').forEach(function(el){el.remove();});
+  nodes={};arrows=[];groups=[];notes=[];selId=null;msel.clear();deselectArrow();disarm();
+  selGroupId=null; grpResizing=null; selNoteId=null; noteResizing=null; noteDragging=null;
   document.getElementById('detail').classList.remove('on');
   document.getElementById('badge').style.display='none';
 
   // Restore
   document.getElementById('ftitle').value=snap.title||'';
-  nid=snap.nid||0; aid=snap.aid||0; gid=snap.gid||0;
+  nid=snap.nid||0; aid=snap.aid||0; gid=snap.gid||0; noid=snap.noid||0;
+
+  // Restore notes
+  notes=[];
+  if(snap.notes&&snap.notes.length){
+    snap.notes.forEach(function(n){
+      notes.push({id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,text:n.text||''});
+      renderNote(notes[notes.length-1]);
+    });
+  }
 
   // Restore groups
   groups=[];
@@ -2050,17 +2327,97 @@ var TMPLS={
   },
   half:{title:'Half Guard System',
     nodes:[
-      {id:'n1',x:340, y:30,  type:'position',   label:'Half guard',           desc:'Battle for underhook or deep half.'},
-      {id:'n2',x:60,  y:280, type:'position',   label:'Deep half guard',      desc:'Dive under for better leverage.'},
-      {id:'n3',x:340, y:280, type:'sweep',      label:'Old school sweep',     desc:'Grab back of knee, sit up and shrimp.'},
-      {id:'n4',x:640, y:280, type:'submission', label:'Kimura trap',          desc:'Trap wrist in kimura grip.'},
-      {id:'n5',x:60,  y:530, type:'position',   label:'Back take',            desc:'Roll toward back, establish hooks.'},
-      {id:'n6',x:340, y:530, type:'position',   label:'Top half guard',       desc:'Sweep succeeded, drive to pass.'},
-      {id:'n7',x:640, y:530, type:'submission', label:'Kimura',               desc:'Rotate shoulder, extend, finish.'},
-      {id:'n8',x:170, y:780, type:'submission', label:'Rear naked choke',     desc:'Seat belt, slide choke and squeeze.'},
-      {id:'n9',x:470, y:780, type:'pass',       label:'Pass to side control', desc:'Drive through half guard leg.'},
+      // ── ENTRY ──
+      {id:'n1', x:1040, y:60,   type:'position',   label:'Half guard (bottom)',    desc:'Control far knee, fight for underhook, look for deep half entry.'},
+
+      // ── BOTTOM GUARD VARIATIONS ──
+      {id:'n2', x:-80,  y:310,  type:'position',   label:'Lockdown',              desc:'Figure-four legs on ankle, stretch opponent, control hips.'},
+      {id:'n3', x:480,  y:310,  type:'position',   label:'Underhook half',        desc:'Secure underhook, knee shield up, prevent crossface.'},
+      {id:'n4', x:1040, y:310,  type:'position',   label:'Z-guard / knee shield', desc:'Knee framing into hip, create space and off-balance.'},
+      {id:'n5', x:1600, y:310,  type:'position',   label:'Deep half guard',       desc:'Dive under, grab far leg, head under hip, elevate.'},
+      {id:'n6', x:2160, y:310,  type:'position',   label:'Dogfight position',     desc:'Both up on knees, underhook and overhook battle.'},
+
+      // ── LOCKDOWN ATTACKS ──
+      {id:'n7', x:-80,  y:560,  type:'sweep',      label:'Electric chair sweep',  desc:'Stretch lockdown, overhook far leg, sit up and roll.'},
+      {id:'n8', x:200,  y:560,  type:'sweep',      label:'Old school sweep',      desc:'Grab back of knee, sit up and shrimp out to top.'},
+
+      // ── UNDERHOOK ATTACKS ──
+      {id:'n9', x:480,  y:560,  type:'sweep',      label:'Sit-up sweep',          desc:'Underhook, post foot, drive into opponent, come on top.'},
+      {id:'n10',x:480,  y:810,  type:'takedown',   label:'Single leg takedown',   desc:'Underhook becomes single leg, run the pipe or trip.'},
+      {id:'n11',x:480,  y:1060, type:'transition',  label:'Back take (underhook)', desc:'Opponent sprawls — step behind, take the back.'},
+
+      // ── KIMURA SYSTEM ──
+      {id:'n21',x:760,  y:560,  type:'submission', label:'Kimura grip',           desc:'Figure-four on wrist from bottom, control the arm.'},
+      {id:'n22',x:760,  y:810,  type:'submission', label:'Kimura finish',         desc:'Rotate shoulder, bring elbow past the hip, extend.'},
+      {id:'n23',x:760,  y:1060, type:'transition',  label:'Kimura to back',       desc:'Opponent defends — use kimura grip to roll to back.'},
+      {id:'n24',x:1040, y:810,  type:'submission', label:'Straight arm lock',     desc:'Kimura grip — extend arm straight for arm lock variation.'},
+
+      // ── Z-GUARD / KNEE SHIELD ATTACKS ──
+      {id:'n12',x:1040, y:560,  type:'sweep',      label:'Push-kick sweep',       desc:'Frame knee into hip, extend leg explosively, sweep forward.'},
+      {id:'n13',x:1320, y:560,  type:'transition',  label:'Enter deep half',      desc:'Knee shield creates space — dive under into deep half.'},
+
+      // ── DEEP HALF ATTACKS ──
+      {id:'n14',x:1600, y:560,  type:'sweep',      label:'Homer Simpson sweep',   desc:'Grab ankle, sit up under hip, roll opponent over the top.'},
+      {id:'n15',x:1600, y:810,  type:'sweep',      label:'Waiter sweep',          desc:'Control far leg like a waiter tray, elevate and come up.'},
+      {id:'n16',x:1600, y:1060, type:'transition',  label:'Back take (deep half)', desc:'Opponent postures — use far leg to rotate to the back.'},
+
+      // ── DOGFIGHT ATTACKS ──
+      {id:'n17',x:2160, y:560,  type:'takedown',   label:'Single leg finish',     desc:'Secure single leg in dogfight, trip or run the pipe.'},
+      {id:'n18',x:2160, y:810,  type:'sweep',      label:'Motorcycle sweep',      desc:'Drop to hip, hook leg, drive through and come on top.'},
+      {id:'n19',x:2160, y:1060, type:'transition',  label:'Back take (dogfight)',  desc:'Snap opponent down, step behind, hooks in.'},
+      {id:'n20',x:1880, y:810,  type:'sweep',      label:'Outside trip',          desc:'Underhook, step outside leg, trip backward to mat.'},
+
+      // ── TOP HALF GUARD ──
+      {id:'n25',x:760,  y:1310, type:'position',   label:'Top half guard',        desc:'Win the underhook battle or crossface — look to pass.'},
+
+      // ── TOP HALF PASSING ──
+      {id:'n26',x:200,  y:1560, type:'pass',       label:'Underhook whip-up',     desc:'Win underhook, walk to back side, pass to side control.'},
+      {id:'n27',x:760,  y:1560, type:'pass',       label:'Smash pass',            desc:'Crossface, drive hip to mat, extract knee, side control.'},
+      {id:'n28',x:1320, y:1560, type:'pass',       label:'Tilt pass',             desc:'Head and arm, tilt opponent to back, slide knee free.'},
+      {id:'n29',x:1880, y:1560, type:'pass',       label:'Back step pass',        desc:'Back step over bottom leg, spin to back or side control.'},
+      {id:'n30',x:2160, y:1310, type:'submission', label:'Kimura from top',       desc:'Isolate near arm in figure-four, rotate shoulder.'},
+
+      // ── OUTCOMES ──
+      {id:'n31',x:200,  y:1810, type:'position',   label:'Side control',          desc:'Crossface and hip pressure — pass complete.'},
+      {id:'n32',x:760,  y:1810, type:'position',   label:'Mount',                 desc:'Walk knees up from side control.'},
+      {id:'n33',x:1320, y:1810, type:'position',   label:'Back mount',            desc:'Back step complete — establish hooks and seat belt.'},
+      {id:'n34',x:1880, y:1310, type:'position',   label:'Back control',          desc:'Back take complete — seat belt, both hooks in.'},
+      {id:'n35',x:1880, y:1810, type:'submission', label:'Rear naked choke',      desc:'Slide arm under chin, figure-four, squeeze and extend.'},
+      {id:'n36',x:2160, y:1810, type:'submission', label:'Bow and arrow choke',   desc:'Deep collar grip, pull far knee, extend the body.'},
     ],
-    arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n9'],['n7','n8']],
+    arrows:[
+      // Entry to guard variations
+      ['n1','n2'],['n1','n3'],['n1','n4'],['n1','n5'],['n1','n6'],
+      // Transitions between variations
+      ['n4','n5'],['n3','n21'],
+      // Lockdown attacks
+      ['n2','n7'],['n2','n8'],
+      ['n7','n25'],['n8','n25'],
+      // Underhook attacks
+      ['n3','n9'],['n3','n10'],
+      ['n9','n25'],['n10','n25'],
+      ['n3','n11'],['n11','n34'],
+      // Kimura system
+      ['n21','n22'],['n21','n23'],['n21','n24'],
+      ['n23','n34'],
+      // Z-guard attacks
+      ['n4','n12'],['n4','n13'],
+      ['n12','n25'],['n13','n5'],
+      // Deep half attacks
+      ['n5','n14'],['n5','n15'],['n5','n16'],
+      ['n14','n25'],['n15','n25'],['n16','n34'],
+      // Dogfight attacks
+      ['n6','n17'],['n6','n18'],['n6','n19'],['n6','n20'],
+      ['n17','n25'],['n18','n25'],['n19','n34'],['n20','n25'],
+      // Top half passing
+      ['n25','n26'],['n25','n27'],['n25','n28'],['n25','n29'],['n25','n30'],
+      // Pass outcomes
+      ['n26','n31'],['n27','n31'],['n27','n32'],
+      ['n28','n31'],['n29','n33'],
+      // Back control
+      ['n34','n35'],['n34','n36'],
+      ['n33','n35'],['n33','n36'],
+    ],
   },
   mount:{title:'Full Mount Attack Tree',
     nodes:[
