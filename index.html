@@ -126,14 +126,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .delbtn:hover{background:var(--dan);border-color:var(--dan);color:#fff}
 #marquee{position:absolute;border:1.5px dashed var(--acc);background:rgba(107,70,193,.06);border-radius:3px;display:none;pointer-events:none;z-index:200}
 #group-marquee{position:absolute;border:2px dashed #06b6d4;background:rgba(6,182,212,.06);border-radius:6px;display:none;pointer-events:none;z-index:199}
-#note-marquee{position:absolute;border:2px dashed #b8a060;background:rgba(255,240,180,.1);border-radius:4px;display:none;pointer-events:none;z-index:199}
-.note-el{position:absolute;background:#fffde7;border:1px solid #e8d87a;border-radius:6px;box-shadow:2px 3px 8px rgba(0,0,0,.10);cursor:default;user-select:none;min-width:140px;min-height:80px;}
-.note-el .note-drag-bar{height:18px;background:#f5e97a;border-radius:5px 5px 0 0;cursor:move;display:flex;align-items:center;padding:0 6px;gap:4px}
-.note-el .note-drag-bar svg{opacity:.5;flex-shrink:0}
-.note-el .note-body{padding:6px 8px;font-size:11px;line-height:1.55;color:#5a4e00;white-space:pre-wrap;word-break:break-word;min-height:60px;cursor:default;}
+#note-marquee{position:absolute;border:2px dashed #999;background:rgba(0,0,0,.04);border-radius:4px;display:none;pointer-events:none;z-index:199}
+.note-el{position:absolute;background:#fff;border:1px solid #d8d5d0;border-radius:6px;box-shadow:1px 2px 6px rgba(0,0,0,.08);cursor:default;user-select:none;min-width:140px;min-height:80px;overflow:hidden;display:flex;flex-direction:column;}
+.note-el .note-drag-bar{height:18px;background:#f0eeea;border-bottom:1px solid #e0ddd7;border-radius:5px 5px 0 0;cursor:move;display:flex;align-items:center;padding:0 6px;gap:4px;flex-shrink:0}
+.note-el .note-drag-bar svg{opacity:.35;flex-shrink:0}
+.note-el .note-body{padding:6px 8px;font-size:11px;line-height:1.55;color:#333;white-space:pre-wrap;word-break:break-word;cursor:default;overflow:hidden;position:relative;flex:1;}
+.note-el .note-body.overflowing::after{content:'…';position:absolute;bottom:4px;right:6px;background:#fff;color:#999;font-size:11px;padding-left:4px;}
 #group-label-editor input{border:none;border-radius:10px;padding:0 10px;font-size:11px;font-weight:700;font-family:'Space Grotesk','Inter',sans-serif;background:transparent;color:#fff;outline:none;box-shadow:none;caret-color:rgba(255,255,255,.8);text-align:left;height:20px;line-height:20px;}
 .group-btn-active{background:rgba(6,182,212,.18)!important;border-color:#06b6d4!important;color:#06b6d4!important}
-.note-btn-active{background:rgba(184,160,96,.18)!important;border-color:#b8a060!important;color:#b8a060!important}
+.note-btn-active{background:rgba(100,100,100,.14)!important;border-color:#888!important;color:#aaa!important}
 #badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:5px 6px 5px 16px;border-radius:20px;font-size:12px;font-weight:600;display:none;white-space:nowrap;box-shadow:var(--sh2);display:none;align-items:center;gap:8px;cursor:default}
 #badge-del{background:rgba(255,255,255,.25);border:none;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 #badge-del:hover{background:rgba(255,255,255,.4)}
@@ -528,7 +529,12 @@ window.addEventListener('mousemove',function(e){
       case 'left':   var nx=Math.min(c.x,no.x+no.w-MIN); no.w=no.w+(no.x-nx); no.x=nx; break;
       case 'right':  no.w=Math.max(MIN,c.x-no.x); break;
     }
-    renderNote(no); return;
+    var el2=document.getElementById(no.id);
+    if(el2){ el2.style.left=no.x+'px'; el2.style.top=no.y+'px'; el2.style.width=no.w+'px'; el2.style.height=no.h+'px';
+      var body=el2.querySelector('.note-body');
+      if(body) body.classList.toggle('overflowing', body.scrollHeight > body.clientHeight + 2);
+    }
+    return;
   }
   // ── Note drag ──
   if(noteDragging){
@@ -1378,11 +1384,17 @@ function renderNote(no){
   el.className='note-el';
   el.style.left=no.x+'px'; el.style.top=no.y+'px';
   el.style.width=no.w+'px'; el.style.height=no.h+'px';
-  if(isSel) el.style.boxShadow='0 0 0 2px #b8a060, 2px 3px 8px rgba(0,0,0,.12)';
+  if(isSel) el.style.boxShadow='0 0 0 2px #999, 1px 2px 6px rgba(0,0,0,.1)';
 
   // Drag bar at top
-  el.innerHTML='<div class="note-drag-bar"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#5a4e00" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="4" x2="10" y2="4"/><line x1="2" y1="7" x2="10" y2="7"/></svg></div>'
+  el.innerHTML='<div class="note-drag-bar"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="4" x2="10" y2="4"/><line x1="2" y1="7" x2="10" y2="7"/></svg></div>'
     +'<div class="note-body" id="nb-'+no.id+'">'+escNote(no.text)+'</div>';
+
+  // Check overflow after DOM is ready
+  requestAnimationFrame(function(){
+    var body=el.querySelector('.note-body');
+    if(body) body.classList.toggle('overflowing', body.scrollHeight > body.clientHeight + 2);
+  });
 
   // If selected, add resize handles
   if(isSel){
@@ -1394,7 +1406,7 @@ function renderNote(no){
     ];
     handleData.forEach(function(h){
       var hel=document.createElement('div');
-      hel.style.cssText='position:absolute;width:'+HR*2+'px;height:'+HR*2+'px;border-radius:50%;background:#fff;border:2px solid #b8a060;z-index:10;'+h.style;
+      hel.style.cssText='position:absolute;width:'+HR*2+'px;height:'+HR*2+'px;border-radius:50%;background:#fff;border:2px solid #888;z-index:10;'+h.style;
       hel.dataset.edge=h.edge;
       hel.addEventListener('mousedown',function(e){
         e.stopPropagation(); e.preventDefault();
