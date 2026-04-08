@@ -266,7 +266,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <svg id="asvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none" width="1" height="1">
         <defs>
           <marker id="ah" markerWidth="12" markerHeight="12" refX="0" refY="6" orient="auto" markerUnits="userSpaceOnUse">
-            <path d="M0,0 L10,6 L0,12 Z" fill="#b0b0b0"/>
+            <path d="M0,0 L10,6 L0,12 Z" fill="context-stroke"/>
           </marker>
         </defs>
         <path id="pline" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="8,5" style="display:none;pointer-events:none"/>
@@ -761,6 +761,7 @@ function addArrow(from,to,label){
   hit.setAttribute('fill','none');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','16');
 
   var line=document.createElementNS('http://www.w3.org/2000/svg','path');
+  line.setAttribute('class','ap');
   line.setAttribute('fill','none');line.setAttribute('stroke','#c0c0c0');line.setAttribute('stroke-width','2');
   line.setAttribute('marker-end','url(#ah)');
 
