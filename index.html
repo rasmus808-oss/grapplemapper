@@ -163,7 +163,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.7</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.8</span>
   </div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sp"></div>
@@ -2107,7 +2107,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v4.7.gmap';
+  var filename=slug+'-v4.8.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -2381,6 +2381,7 @@ var TMPLS={
       {id:'n4', x:1040, y:310,  type:'position',   label:'Z-guard / knee shield', desc:'Knee framing into hip, create space and off-balance.'},
       {id:'n5', x:1600, y:310,  type:'position',   label:'Deep half guard',       desc:'Dive under, grab far leg, head under hip, elevate.'},
       {id:'n6', x:2160, y:310,  type:'position',   label:'Dogfight position',     desc:'Both up on knees, underhook and overhook battle.'},
+      {id:'n37',x:2720, y:310,  type:'position',   label:'Quarter guard',         desc:'Opponent has almost passed — one leg trapped, hips flat, fight to recover.'},
 
       // ── LOCKDOWN ATTACKS ──
       {id:'n7', x:-80,  y:560,  type:'sweep',      label:'Electric chair sweep',  desc:'Stretch lockdown, overhook far leg, sit up and roll.'},
@@ -2412,6 +2413,14 @@ var TMPLS={
       {id:'n19',x:2160, y:1060, type:'transition',  label:'Back take (dogfight)',  desc:'Snap opponent down, step behind, hooks in.'},
       {id:'n20',x:1880, y:810,  type:'sweep',      label:'Outside trip',          desc:'Underhook, step outside leg, trip backward to mat.'},
 
+      // ── QUARTER GUARD ATTACKS ──
+      {id:'n38',x:2720, y:560,  type:'escape',     label:'Shrimp & reguard',      desc:'Hip escape hard into opponent, knee inside, recover full half guard.'},
+      {id:'n39',x:3000, y:560,  type:'escape',     label:'Granby roll',           desc:'Roll away on shoulder, invert under, recover butterfly or open guard.'},
+      {id:'n40',x:2720, y:810,  type:'submission', label:'Kimura from bottom',    desc:'Trap near arm in figure-four, threaten kimura before they settle.'},
+      {id:'n41',x:3000, y:810,  type:'transition',  label:'Turtle up',            desc:'Give up the position, roll to turtle — defend and look for reversal.'},
+      {id:'n42',x:2720, y:1060, type:'transition',  label:'Frame & re-half',      desc:'Stiff-arm into hip or throat, create enough space to pull knee back in.'},
+      {id:'n43',x:3000, y:1060, type:'escape',     label:'Lockdown from quarter', desc:'Secure figure-four on ankle before they fully pass — drag back to lockdown.'},
+
       // ── TOP HALF GUARD ──
       {id:'n25',x:760,  y:1310, type:'position',   label:'Top half guard',        desc:'Win the underhook battle or crossface — look to pass.'},
 
@@ -2432,9 +2441,15 @@ var TMPLS={
     ],
     arrows:[
       // Entry to guard variations
-      ['n1','n2'],['n1','n3'],['n1','n4'],['n1','n5'],['n1','n6'],
+      ['n1','n2'],['n1','n3'],['n1','n4'],['n1','n5'],['n1','n6'],['n1','n37'],
       // Transitions between variations
       ['n4','n5'],['n3','n21'],
+      // Quarter guard — can arrive from half guard degrading or dogfight
+      ['n37','n38'],['n37','n39'],['n37','n40'],['n37','n41'],['n37','n42'],['n37','n43'],
+      // Quarter guard recoveries loop back
+      ['n38','n1'],['n39','n1'],['n42','n1'],['n43','n2'],
+      // Quarter guard kimura → back
+      ['n40','n34'],
       // Lockdown attacks
       ['n2','n7'],['n2','n8'],
       ['n7','n25'],['n8','n25'],
