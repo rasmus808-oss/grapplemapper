@@ -155,7 +155,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.6</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.7</span>
   </div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sp"></div>
@@ -211,10 +211,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <div class="ss">
         <div class="sl">Templates</div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <button class="btn" style="text-align:left" onclick="loadTmpl('guard')">&#x1F4CB; Guard passing</button>
+          <button class="btn" style="text-align:left" onclick="loadTmpl('sidecontrol')">&#x1F4CB; Side control</button>
           <button class="btn" style="text-align:left" onclick="loadTmpl('closed')">&#x1F4CB; Closed guard</button>
           <button class="btn" style="text-align:left" onclick="loadTmpl('half')">&#x1F4CB; Half guard</button>
-          <button class="btn" style="text-align:left" onclick="loadTmpl('mount')">&#x1F4CB; Mount attacks</button>
+          <button class="btn" style="text-align:left" onclick="loadTmpl('mount')">&#x1F4CB; Full mount</button>
+          <button class="btn" style="text-align:left" onclick="loadTmpl('backmount')">&#x1F4CB; Back mount</button>
           <button class="btn" style="text-align:left" onclick="loadTmpl('leglocks')">&#x1F4CB; Leglock system</button>
         </div>
       </div>
@@ -1747,7 +1748,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v4.6.gmap';
+  var filename=slug+'-v4.7.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -1953,19 +1954,51 @@ function exportPDF(){
 }
 
 var TMPLS={
-  guard:{title:'Open Guard Passing System',
+  sidecontrol:{title:'Top Side Control',
     nodes:[
-      {id:'n1',x:370, y:30,  type:'position',  label:'Open guard',       desc:'Opponent in seated open guard.'},
-      {id:'n2',x:60,  y:280, type:'pass',       label:'Torreando pass',   desc:'Control ankles, bullfight legs to the side.'},
-      {id:'n3',x:370, y:280, type:'pass',       label:'Knee cut pass',    desc:'Slice knee through to flatten the guard.'},
-      {id:'n4',x:680, y:280, type:'pass',       label:'Leg drag',         desc:'Drag far leg, drive shoulder into hip.'},
-      {id:'n5',x:60,  y:530, type:'position',   label:'Side control',     desc:'Heavy cross-face and hip pressure.'},
-      {id:'n6',x:370, y:530, type:'position',   label:'Half guard (top)', desc:'Opponent recovers half guard.'},
-      {id:'n7',x:680, y:530, type:'position',   label:'Back mount',       desc:'Seat belt grip, establish hooks.'},
-      {id:'n8',x:190, y:780, type:'position',   label:'Mount',            desc:'Walk knees up into high mount.'},
-      {id:'n9',x:500, y:780, type:'submission', label:'Armbar',           desc:'Break posture and attack the armbar.'},
+      // ── Entry (row 1) ──
+      {id:'n1', x:370, y:30,  type:'position',   label:'Side control',         desc:'Cross-face and hip pressure. Control near hip with knee.'},
+
+      // ── Immediate threats / adjustments (row 2) ──
+      {id:'n2', x:60,  y:280, type:'position',   label:'Knee on belly',        desc:'Post knee on stomach, control collar and hip.'},
+      {id:'n3', x:370, y:280, type:'transition',  label:'North-south',          desc:'Walk around head, maintain chest-to-chest pressure.'},
+      {id:'n4', x:680, y:280, type:'transition',  label:'Reverse scarf hold',   desc:'Hip into ribs, control far arm and head.'},
+
+      // ── Upgrade positions (row 3) ──
+      {id:'n5', x:60,  y:530, type:'position',   label:'Mount',                desc:'Walk knees up, maintain weight, avoid half guard.'},
+      {id:'n6', x:310, y:530, type:'position',   label:'Back take',            desc:'Opponent rolls to turtle — follow to back.'},
+      {id:'n7', x:560, y:530, type:'position',   label:'S-mount',              desc:'Rotate knee over to isolate arm for armbar.'},
+      {id:'n8', x:810, y:530, type:'submission',  label:'North-south choke',    desc:'Arm under neck, clasp hands, drive chest down.'},
+
+      // ── Submissions (row 4) ──
+      {id:'n9', x:60,  y:780, type:'submission',  label:'Cross collar choke',   desc:'Deep grip, second hand over, drive elbows to mat.'},
+      {id:'n10',x:250, y:780, type:'submission',  label:'Americana',            desc:'Paint brush wrist, figure-four, rotate shoulder.'},
+      {id:'n11',x:440, y:780, type:'submission',  label:'Armbar',               desc:'Step over head, squeeze knees, extend hips.'},
+      {id:'n12',x:630, y:780, type:'submission',  label:'Kimura',               desc:'Figure-four grip on wrist, rotate behind back.'},
+      {id:'n13',x:820, y:780, type:'submission',  label:'Rear naked choke',     desc:'Seat belt, slide arm under chin, squeeze.'},
+
+      // ── Escapes opponent might attempt (row 5) ──
+      {id:'n14',x:160, y:1030,type:'escape',      label:'Hip escape counter',   desc:'Follow shrimp — re-establish cross-face, drop weight.'},
+      {id:'n15',x:430, y:1030,type:'escape',      label:'Bridge & roll counter', desc:'Post on their hip, drive knee back in.'},
+      {id:'n16',x:700, y:1030,type:'transition',  label:'Turtle — take back',   desc:'Opponent gives up guard — attack turtle or take back.'},
     ],
-    arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n8'],['n7','n9'],['n8','n9']],
+    arrows:[
+      // Side control → adjustments
+      ['n1','n2'],['n1','n3'],['n1','n4'],
+      // Adjustments → upgrades
+      ['n2','n5'],['n2','n10'],
+      ['n3','n8'],['n3','n6'],
+      ['n4','n12'],['n4','n7'],
+      // Upgrades → submissions
+      ['n5','n9'],['n5','n11'],
+      ['n6','n13'],
+      ['n7','n11'],['n7','n12'],
+      // Knee on belly direct attacks
+      ['n2','n9'],
+      // Escape counters
+      ['n1','n14'],['n1','n15'],['n1','n16'],
+      ['n14','n1'],['n15','n1'],['n16','n6'],
+    ],
   },
   half:{title:'Half Guard System',
     nodes:[
@@ -1981,7 +2014,7 @@ var TMPLS={
     ],
     arrows:[['n1','n2'],['n1','n3'],['n1','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n8'],['n6','n9'],['n7','n8']],
   },
-  mount:{title:'Mount Attack Tree',
+  mount:{title:'Full Mount Attack Tree',
     nodes:[
       {id:'n1',x:330, y:30,  type:'position',   label:'Low mount',          desc:'Establish base, hook the hips.'},
       {id:'n2',x:80,  y:280, type:'position',   label:'High mount',         desc:'Walk knees up to armpits.'},
@@ -2065,6 +2098,48 @@ var TMPLS={
       ['n14','n4'],['n16','n5'],['n17','n6'],
     ],
   },
+  backmount:{title:'Back Mount Attacks',
+    nodes:[
+      // ── Entry (row 1) ──
+      {id:'n1', x:370, y:30,  type:'position',   label:'Back mount',           desc:'Seat belt grip, both hooks in, hips glued together.'},
+
+      // ── Hook / grip adjustments (row 2) ──
+      {id:'n2', x:60,  y:280, type:'position',   label:'Body triangle',        desc:'Lock legs in triangle around waist — no hooks needed.'},
+      {id:'n3', x:370, y:280, type:'transition',  label:'Over-under seat belt', desc:'One arm over shoulder, one under armpit, hands clasped.'},
+      {id:'n4', x:680, y:280, type:'transition',  label:'Harness / double under',desc:'Both arms under armpits, chin strap or wrist control.'},
+
+      // ── Choke setups (row 3) ──
+      {id:'n5', x:60,  y:530, type:'submission',  label:'Rear naked choke',     desc:'Slide arm under chin, lock figure-four, squeeze and extend.'},
+      {id:'n6', x:310, y:530, type:'submission',  label:'Bow and arrow choke',  desc:'Collar grip deep, pull far leg, extend body.'},
+      {id:'n7', x:560, y:530, type:'submission',  label:'Arm-in ezekiel',       desc:'Sleeve grip over neck, fist into throat, squeeze.'},
+      {id:'n8', x:810, y:530, type:'submission',  label:'Ninja choke',          desc:'Over-hook arm, thread leg, triangle from back.'},
+
+      // ── Arm attacks (row 4) ──
+      {id:'n9', x:60,  y:780, type:'submission',  label:'Armbar from back',     desc:'Isolate arm, step leg over head, extend hips.'},
+      {id:'n10',x:310, y:780, type:'submission',  label:'Kimura from back',     desc:'Figure-four on near wrist, rotate behind back.'},
+      {id:'n11',x:560, y:780, type:'submission',  label:'Shoulder lock (Twister)',desc:'Twister hook, pull head, arch back.'},
+
+      // ── Escape counters / retention (row 5) ──
+      {id:'n12',x:120, y:1030,type:'escape',      label:'Chin tuck / posture counter', desc:'They chin-tuck — switch to armbar or wrist lock.'},
+      {id:'n13',x:390, y:1030,type:'transition',  label:'Opponent rolls over',  desc:'Follow the roll — maintain back or take mount.'},
+      {id:'n14',x:660, y:1030,type:'position',    label:'Mount (position kept)',desc:'Hooks slip — transition to full mount, no points lost.'},
+    ],
+    arrows:[
+      // Back mount → adjustments
+      ['n1','n2'],['n1','n3'],['n1','n4'],
+      // Adjustments → chokes
+      ['n2','n5'],['n2','n6'],
+      ['n3','n5'],['n3','n7'],
+      ['n4','n8'],['n4','n5'],
+      // Adjustments → arm attacks
+      ['n3','n10'],['n4','n9'],
+      // Choke → arm attack chains
+      ['n5','n9'],['n6','n11'],
+      // Escape counters
+      ['n1','n12'],['n1','n13'],['n1','n14'],
+      ['n12','n9'],['n13','n14'],
+    ],
+  },
 };
 function loadTmpl(name){
   clearAll();
@@ -2091,7 +2166,7 @@ function loadTmpl(name){
     restoreMapState(saved, true);
     showToast('Restored your last session ✓');
   } else {
-    loadTmpl('guard');
+    loadTmpl('sidecontrol');
   }
   applyT();
   // Clear undo stack after init so users can't undo into blank state
