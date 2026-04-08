@@ -217,6 +217,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
           <button class="btn" style="text-align:left;display:flex;align-items:center;gap:7px" onclick="loadTmpl('mount')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="4" height="3" rx="1"/><rect x="7" y="8" width="4" height="3" rx="1"/><line x1="3" y1="4" x2="3" y2="6"/><line x1="3" y1="6" x2="9" y2="6"/><line x1="9" y1="6" x2="9" y2="8"/></svg>Full mount</button>
           <button class="btn" style="text-align:left;display:flex;align-items:center;gap:7px" onclick="loadTmpl('backmount')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="4" height="3" rx="1"/><rect x="7" y="8" width="4" height="3" rx="1"/><line x1="3" y1="4" x2="3" y2="6"/><line x1="3" y1="6" x2="9" y2="6"/><line x1="9" y1="6" x2="9" y2="8"/></svg>Back mount</button>
           <button class="btn" style="text-align:left;display:flex;align-items:center;gap:7px" onclick="loadTmpl('leglocks')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="4" height="3" rx="1"/><rect x="7" y="8" width="4" height="3" rx="1"/><line x1="3" y1="4" x2="3" y2="6"/><line x1="3" y1="6" x2="9" y2="6"/><line x1="9" y1="6" x2="9" y2="8"/></svg>Leglock system</button>
+          <button class="btn" style="text-align:left;display:flex;align-items:center;gap:7px" onclick="loadTmpl('complete')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="4" height="3" rx="1"/><rect x="7" y="1" width="4" height="3" rx="1"/><rect x="4" y="8" width="4" height="3" rx="1"/><line x1="3" y1="4" x2="3" y2="7"/><line x1="9" y1="4" x2="9" y2="7"/><line x1="3" y1="7" x2="6" y2="7"/><line x1="9" y1="7" x2="6" y2="7"/><line x1="6" y1="7" x2="6" y2="8"/></svg>The whole damn system</button>
         </div>
       </div>
       <div class="ss">
@@ -2145,6 +2146,147 @@ var TMPLS={
       ['n14','n4'],['n16','n5'],['n17','n6'],
     ],
   },
+  complete:{title:'The Whole Damn System',
+    nodes:[
+      // ── STANDING ──
+      {id:'n1',  x:2000, y:80,   type:'position',   label:'Standing',            desc:'Fight for grips, level changes, collar ties.'},
+
+      // ── TAKEDOWNS ──
+      {id:'n2',  x:500,  y:340,  type:'takedown',   label:'Double leg',          desc:'Level change, penetration step, drive through.'},
+      {id:'n3',  x:840,  y:280,  type:'takedown',   label:'Single leg',          desc:'Scoop ankle, elevate and dump, or run the pipe.'},
+      {id:'n4',  x:1180, y:330,  type:'takedown',   label:'Ankle pick',          desc:'Collar tie, snap head down, step in and pick.'},
+      {id:'n5',  x:1600, y:280,  type:'takedown',   label:'Osoto gari',          desc:'Collar and sleeve, off-balance, reap outside leg.'},
+      {id:'n6',  x:2000, y:340,  type:'takedown',   label:'Seoi nage',           desc:'Grip, load on back, throw forward.'},
+      {id:'n7',  x:2520, y:260,  type:'transition',  label:'Guard pull',          desc:'Sit to guard, feet on hips, control sleeves.'},
+
+      // ── GUARD PASSES (top right — attacker's options) ──
+      {id:'n29', x:3060, y:280,  type:'pass',       label:'Knee cut pass',       desc:'Slice knee through, flatten, drive to side control.'},
+      {id:'n30', x:3380, y:280,  type:'pass',       label:'Leg drag pass',       desc:'Drag far leg across, shoulder pressure, pass.'},
+
+      // ── GUARD POSITIONS ──
+      {id:'n8',  x:120,  y:640,  type:'position',   label:'Closed guard',        desc:'Lock ankles, break posture, pull to chest.'},
+      {id:'n9',  x:660,  y:610,  type:'position',   label:'Half guard',           desc:'Control far knee, fight for underhook.'},
+      {id:'n10', x:1220, y:650,  type:'position',   label:'Butterfly guard',     desc:'Hooks under thighs, grip fight, elevate.'},
+      {id:'n11', x:1760, y:610,  type:'position',   label:'De La Riva',          desc:'DLR hook, sleeve and ankle control.'},
+      {id:'n12', x:2300, y:650,  type:'position',   label:'X-guard',             desc:'Under both legs, elevate hips, attack.'},
+      {id:'n13', x:2860, y:600,  type:'position',   label:'Back control',        desc:'Seat belt, hooks in, hips glued.'},
+
+      // ── CLOSED GUARD ATTACKS ──
+      {id:'n14', x:-160, y:920,  type:'sweep',      label:'Hip bump sweep',      desc:'Sit up, post hand, drive hip explosively.'},
+      {id:'n15', x:180,  y:920,  type:'sweep',      label:'Scissor sweep',       desc:'Knee across belly, foot on hip, pull and push.'},
+      {id:'n16', x:-200, y:1160, type:'submission', label:'Kimura',              desc:'Trap wrist, figure-four grip, rotate shoulder.'},
+      {id:'n17', x:120,  y:1180, type:'submission', label:'Guillotine',          desc:'Head control, arm around neck, arch and squeeze.'},
+      {id:'n18', x:-100, y:1430, type:'submission', label:'Triangle choke',      desc:'Angle off, figure-four legs, pull head, squeeze.'},
+      {id:'n19', x:200,  y:1430, type:'submission', label:'Omoplata',            desc:'Hip escape, leg over shoulder, sit up and rotate.'},
+      {id:'n20', x:-200, y:1680, type:'submission', label:'Armbar',              desc:'Break posture, step over head, extend hips.'},
+
+      // ── HALF GUARD ATTACKS ──
+      {id:'n21', x:560,  y:920,  type:'sweep',      label:'Old school sweep',    desc:'Grab back of knee, sit up, shrimp out.'},
+      {id:'n22', x:900,  y:900,  type:'position',   label:'Deep half guard',     desc:'Dive under, grab far leg, elevate and roll.'},
+      {id:'n23', x:560,  y:1180, type:'sweep',      label:'Deep half sweep',     desc:'Roll under opponent, come up on top.'},
+      {id:'n24', x:900,  y:1160, type:'submission', label:'Kimura trap',         desc:'Trap wrist in kimura, threaten from guard.'},
+
+      // ── BUTTERFLY ATTACKS ──
+      {id:'n25', x:1220, y:920,  type:'sweep',      label:'Butterfly sweep',     desc:'Hook elevate, off-balance sideways, come on top.'},
+      {id:'n26', x:1220, y:1180, type:'transition',  label:'Arm drag to back',   desc:'Arm drag, step around outside, take back.'},
+
+      // ── DE LA RIVA ATTACKS ──
+      {id:'n28', x:1760, y:880,  type:'pass',       label:'Torreando pass',      desc:'Control ankles, bullfight legs aside, pass.'},
+      {id:'n27', x:1760, y:1140, type:'sweep',      label:'DLR sweep',           desc:'Off-balance forward over the hook, come on top.'},
+
+      // ── X-GUARD ATTACKS ──
+      {id:'n31', x:2300, y:920,  type:'sweep',      label:'X-guard sweep',       desc:'Extend both legs to off-balance and sweep.'},
+      {id:'n32', x:2620, y:940,  type:'position',   label:'Single leg X',        desc:'Shin across hip, outside hook on ankle.'},
+
+      // ── LEG LOCKS ──
+      {id:'n33', x:2940, y:1100, type:'position',   label:'Ashi garami',         desc:'Single leg entanglement — inside heel hook position.'},
+      {id:'n37', x:2620, y:1230, type:'submission', label:'Kneebar',             desc:'Patella over forearm, hips drive through knee.'},
+      {id:'n36', x:2620, y:1490, type:'submission', label:'Straight ankle lock', desc:'Blade of wrist on Achilles, arch back and rotate.'},
+      {id:'n34', x:2940, y:1360, type:'submission', label:'Inside heel hook',    desc:'Cup heel, elbow rotates down, hip drives in.'},
+      {id:'n35', x:3260, y:1360, type:'submission', label:'Outside heel hook',   desc:'Far heel, rotate knee inward, body weight down.'},
+
+      // ── BACK CONTROL ATTACKS ──
+      {id:'n38', x:3200, y:820,  type:'submission', label:'Rear naked choke',    desc:'Slide under chin, figure-four, squeeze and extend.'},
+      {id:'n39', x:3500, y:820,  type:'submission', label:'Bow and arrow',       desc:'Deep collar grip, pull far knee, extend body.'},
+      {id:'n40', x:3500, y:580,  type:'submission', label:'Armbar from back',    desc:'Isolate arm, step leg over head, extend hips.'},
+
+      // ── TOP POSITIONS ──
+      {id:'n41', x:660,  y:1620, type:'position',   label:'Side control',        desc:'Heavy cross-face, hip pressure, control near arm.'},
+      {id:'n42', x:1020, y:1580, type:'position',   label:'Knee on belly',       desc:'Knee on stomach, collar and hip control.'},
+      {id:'n43', x:1380, y:1640, type:'position',   label:'North-south',         desc:'Walk around head, chest-to-chest, control arms.'},
+      {id:'n44', x:1740, y:1600, type:'position',   label:'Mount',               desc:'High mount or S-mount, attack arms and neck.'},
+      {id:'n45', x:2100, y:1590, type:'position',   label:'Back mount',          desc:'Both hooks, seat belt, hunt the choke.'},
+
+      // ── SIDE CONTROL SUBMISSIONS ──
+      {id:'n46', x:360,  y:1870, type:'submission', label:'Americana',           desc:'Paintbrush wrist, figure-four, rotate shoulder out.'},
+      {id:'n47', x:680,  y:1890, type:'submission', label:'Kimura (top)',        desc:'Figure-four, step over, rotate behind back.'},
+
+      // ── NORTH-SOUTH SUBMISSION ──
+      {id:'n48', x:1380, y:1890, type:'submission', label:'North-south choke',   desc:'Arm under neck, clasp, drop chest weight.'},
+
+      // ── MOUNT SUBMISSIONS ──
+      {id:'n49', x:1520, y:2130, type:'submission', label:'Cross collar choke',  desc:'Four fingers deep, second hand over, drive down.'},
+      {id:'n50', x:1840, y:2110, type:'submission', label:'Ezekiel choke',       desc:'Sleeve grip over neck, fist into throat, squeeze.'},
+      {id:'n51', x:1520, y:2390, type:'submission', label:'Armbar (mount)',      desc:'Step leg over head, isolate, extend hips.'},
+      {id:'n52', x:1840, y:2390, type:'submission', label:'Triangle (mount)',    desc:'Trap arm, swing leg over, lock and squeeze.'},
+
+      // ── BACK MOUNT SUBMISSIONS ──
+      {id:'n53', x:2100, y:1870, type:'submission', label:'Rear naked choke',    desc:'Slide under chin, lock figure-four, squeeze.'},
+      {id:'n54', x:2420, y:1870, type:'submission', label:'Bow and arrow (top)', desc:'Deep collar grip, pull far knee, arch body.'},
+
+      // ── ESCAPES ──
+      {id:'n55', x:360,  y:2150, type:'escape',     label:'Bridge and roll',     desc:'Trap arm and ankle, bridge explosively, roll.'},
+      {id:'n56', x:680,  y:2210, type:'escape',     label:'Elbow-knee escape',   desc:'Frame with elbow and knee, shrimp, reguard.'},
+      {id:'n57', x:2420, y:2150, type:'escape',     label:'Back escape',         desc:'Chin tuck, shoulder roll forward, face opponent.'},
+    ],
+    arrows:[
+      // Standing → takedowns & guard pull
+      ['n1','n2'],['n1','n3'],['n1','n4'],['n1','n5'],['n1','n6'],['n1','n7'],
+      // Takedowns → side control
+      ['n2','n41'],['n3','n41'],['n4','n41'],['n5','n41'],['n6','n41'],
+      ['n2','n9'],['n3','n9'],
+      // Guard pull → guards
+      ['n7','n8'],['n7','n10'],['n7','n11'],
+      // Closed guard → attacks
+      ['n8','n14'],['n8','n15'],['n8','n16'],['n8','n17'],['n8','n18'],
+      ['n14','n41'],['n15','n41'],
+      ['n17','n19'],['n18','n20'],
+      // Half guard → attacks
+      ['n9','n21'],['n9','n22'],['n9','n24'],
+      ['n22','n23'],
+      ['n21','n41'],['n23','n41'],
+      // Butterfly → attacks
+      ['n10','n25'],['n10','n26'],
+      ['n25','n41'],['n26','n13'],
+      // DLR → attacks & passes
+      ['n11','n27'],['n11','n28'],
+      ['n27','n41'],['n28','n41'],
+      // X-guard → attacks
+      ['n12','n31'],['n12','n32'],
+      ['n31','n41'],['n32','n33'],
+      // Leg locks
+      ['n33','n37'],['n33','n34'],['n33','n36'],
+      ['n34','n35'],
+      // Guard passes → side control
+      ['n29','n41'],['n30','n41'],
+      // Back attacks
+      ['n13','n38'],['n13','n39'],['n13','n40'],
+      // Top position chain
+      ['n41','n42'],['n41','n43'],['n41','n44'],['n41','n45'],
+      ['n42','n44'],['n43','n48'],['n44','n45'],
+      // SC submissions
+      ['n41','n46'],['n41','n47'],
+      // Mount submissions
+      ['n44','n49'],['n44','n50'],['n44','n51'],['n44','n52'],
+      // Back mount submissions
+      ['n45','n53'],['n45','n54'],
+      // Kimura trap chain
+      ['n24','n47'],
+      // Escapes → guard
+      ['n44','n55'],['n41','n56'],['n45','n57'],
+      ['n55','n8'],['n56','n9'],['n57','n8'],
+    ],
+  },
   backmount:{title:'Back Mount Attacks',
     nodes:[
       // ── Entry (row 1) ──
@@ -2201,6 +2343,15 @@ function loadTmpl(name){
   setTimeout(function(){
     T.nodes.forEach(function(nd){nodes[nd.id].h=document.getElementById(nd.id).offsetHeight||120;});
     T.arrows.forEach(function(a){addArrow(a[0],a[1],a[2]||'');});
+    // Render template groups if any
+    if(T.groups){
+      T.groups.forEach(function(g){
+        gid++;
+        var grp={id:'g'+gid,x:g.x,y:g.y,w:g.w,h:g.h,label:g.label,color:g.color||GROUP_COLORS[gid%GROUP_COLORS.length]};
+        groups.push(grp);
+        renderGroup(grp);
+      });
+    }
     fitView();
   },200);
 }
