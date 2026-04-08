@@ -372,32 +372,51 @@ function canvasWheel(e){
 }
 var _muted={};
 
-// Listen for YouTube player state changes (video ended = state -1 or 0)
+// Subscribe each new YT iframe to state change events once it loads
+function subscribeYTFrame(iframe){
+  iframe.addEventListener('load',function(){
+    try{
+      iframe.contentWindow.postMessage(JSON.stringify({
+        event:'listening',
+        id:iframe.id
+      }),'*');
+    }catch(ex){}
+  });
+}
+
+// Listen for YouTube player state changes
+// state 0 = ended, state -1 = unstarted
 window.addEventListener('message',function(e){
   try{
     var data=JSON.parse(e.data);
-    if(data.event==='infoDelivery'&&data.info&&typeof data.info.playerState!=='undefined'){
-      if(data.info.playerState===0){
-        // Video ended — find which node has this iframe and reset it
-        document.querySelectorAll('.nvframe iframe').forEach(function(iframe){
-          if(iframe.contentWindow===e.source){
-            var nframe=iframe.closest('.node');
-            if(nframe){
-              var nid=nframe.id;
-              if(nodes[nid]){
-                nodes[nid].playing=false;
-                if(nodes[nid].prePlayW) nodes[nid].w=nodes[nid].prePlayW;
-                delete _muted[nid];
-                refreshNode(nid);
-                setTimeout(function(){
-                  var el=document.getElementById(nid);
-                  if(el){nodes[nid].h=el.offsetHeight||120;redrawArrows();}
-                },100);
-              }
+    // onStateChange fires with {event:'onStateChange', info:<state>}
+    // infoDelivery fires with {event:'infoDelivery', info:{playerState:<state>}}
+    var state=null;
+    if(data.event==='onStateChange'){
+      state=data.info;
+    } else if(data.event==='infoDelivery'&&data.info&&typeof data.info.playerState!=='undefined'){
+      state=data.info.playerState;
+    }
+    if(state===0){
+      // Video ended — find the node whose iframe sent this message and reset it
+      document.querySelectorAll('.nvframe iframe').forEach(function(iframe){
+        if(iframe.contentWindow===e.source){
+          var nframe=iframe.closest('.node');
+          if(nframe){
+            var nid=nframe.id;
+            if(nodes[nid]){
+              nodes[nid].playing=false;
+              if(nodes[nid].prePlayW) nodes[nid].w=nodes[nid].prePlayW;
+              delete _muted[nid];
+              refreshNode(nid);
+              setTimeout(function(){
+                var el=document.getElementById(nid);
+                if(el){nodes[nid].h=el.offsetHeight||120;redrawArrows();}
+              },100);
             }
           }
-        });
-      }
+        }
+      });
     }
   }catch(ex){}
 });
@@ -895,6 +914,9 @@ function renderNode(id){
   var el=mkNodeEl(id);
   attachEv(el,id);
   canvas.appendChild(el);
+  // Subscribe any YouTube iframe to state-change events
+  var ytf=el.querySelector('iframe[id^="ytf-"]');
+  if(ytf) subscribeYTFrame(ytf);
   requestAnimationFrame(function(){nodes[id].h=el.offsetHeight||120;redrawArrows();autoSave();});
 }
 function refreshNode(id){
