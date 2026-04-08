@@ -155,7 +155,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
       <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.5</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.6</span>
   </div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sp"></div>
@@ -265,8 +265,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
     <div id="canvas">
       <svg id="asvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none" width="1" height="1">
         <defs>
-          <marker id="ah" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="#b0b0b0"/>
+          <marker id="ah" markerWidth="12" markerHeight="12" refX="0" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,0 L10,6 L0,12 Z" fill="#b0b0b0"/>
           </marker>
         </defs>
         <path id="pline" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="8,5" style="display:none;pointer-events:none"/>
@@ -734,8 +734,13 @@ function posArrow(a){
     if(dx>0){fp={x:fn.x+fw,y:fn.y+fh/2};ep={x:1,y:0};tp={x:tn.x,y:tn.y+th/2};rp={x:-1,y:0};}
     else    {fp={x:fn.x,y:fn.y+fh/2};   ep={x:-1,y:0};tp={x:tn.x+tw,y:tn.y+th/2};rp={x:1,y:0};}
   }
-  var d=pathD(fp.x,fp.y,ep.x,ep.y,tp.x,tp.y,rp.x,rp.y);
+  // Pull path back by arrowhead depth (10 canvas units = marker path length)
+  // so the tip lands on the edge and the body sits outside the node
+  var AH=10;
+  var tpa={x:tp.x+rp.x*AH, y:tp.y+rp.y*AH};
+  var d=pathD(fp.x,fp.y,ep.x,ep.y,tpa.x,tpa.y,rp.x,rp.y);
   g.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d);});
+  // Label at midpoint of the visible curve (between source and target edge)
   var mx=(fp.x+tp.x)/2,my=(fp.y+tp.y)/2;
   var txt=g.querySelector('text');
   if(txt){
@@ -1741,7 +1746,7 @@ function restoreMapState(state, skipConfirm){
 function saveMap(){
   var state=getMapState();
   var slug=state.title.replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').toLowerCase();
-  var filename=slug+'-v4.5.gmap';
+  var filename=slug+'-v4.6.gmap';
   var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
