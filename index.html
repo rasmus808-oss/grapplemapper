@@ -18,7 +18,7 @@
   --bg:#f0eeea;--surf:#fff;--bord:#e0ddd7;--bord2:#c8c5be;
   --text:#18170f;--mut:#8a8780;--acc:#6b46c1;--al:#ede9f8;
   --dan:#dc2626;
-  --dark:#3e3c39;--dark2:#484643;--dbord:#4a4845;--dbord2:#5a5855;--dtext:#e8e6df;--dmut:#9a9895;
+  --dark:#52504d;--dark2:#5e5c59;--dbord:#686460;--dbord2:#787470;--dtext:#f0ede6;--dmut:#b8b5b0;
   --sh:0 2px 8px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.05);
   --sh2:0 8px 28px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.07);
 }
@@ -53,9 +53,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .sl{font-size:10px;font-weight:700;color:#7a7875;text-transform:uppercase;letter-spacing:.09em;margin-bottom:9px}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{padding:5px 11px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;border:1.5px solid var(--dbord);background:transparent;color:var(--dmut);transition:all .15s}
-.chip:hover,.chip.on{border-color:var(--acc);color:#c4b5f8;background:rgba(107,70,193,.2)}
-.add-big{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:10px;background:rgba(107,70,193,.15);border:1.5px dashed rgba(107,70,193,.5);color:#c4b5f8;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .15s}
-.add-big:hover{background:rgba(107,70,193,.25)}
+.chip:hover{border-color:var(--acc);color:#c4b5f8;background:rgba(107,70,193,.12)}
+.add-big{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px dashed rgba(255,255,255,.22);color:var(--dmut);cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .15s}
+.add-big:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.35);color:var(--dtext)}
 .howto{font-size:11px;color:var(--dmut);line-height:1.9}
 .howto li{list-style:none;padding-left:14px;position:relative}
 .howto li::before{content:'·';position:absolute;left:0;color:var(--acc)}
@@ -196,13 +196,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <div class="ss">
         <div class="sl">Type</div>
         <div class="chips">
-          <button class="chip on" onclick="setType('position',this)">Position</button>
-          <button class="chip" onclick="setType('sweep',this)">Sweep</button>
-          <button class="chip" onclick="setType('submission',this)">Submission</button>
-          <button class="chip" onclick="setType('pass',this)">Pass</button>
-          <button class="chip" onclick="setType('escape',this)">Escape</button>
-          <button class="chip" onclick="setType('takedown',this)">Takedown</button>
-          <button class="chip" onclick="setType('transition',this)">Transition</button>
+          <button class="chip on" data-type="position" onclick="setType('position',this)">Position</button>
+          <button class="chip" data-type="sweep" onclick="setType('sweep',this)">Sweep</button>
+          <button class="chip" data-type="submission" onclick="setType('submission',this)">Submission</button>
+          <button class="chip" data-type="pass" onclick="setType('pass',this)">Pass</button>
+          <button class="chip" data-type="escape" onclick="setType('escape',this)">Escape</button>
+          <button class="chip" data-type="takedown" onclick="setType('takedown',this)">Takedown</button>
+          <button class="chip" data-type="transition" onclick="setType('transition',this)">Transition</button>
         </div>
       </div>
       <div class="ss">
@@ -285,25 +285,25 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 </div>
 <script>
 const META={
-  position:  {label:'Position',  color:'#e8e8e8',bg:'#f5f5f5',textColor:'#444',
+  position:  {label:'Position',  color:'#c0c0c0',bg:'#f5f5f5',textColor:'#444',sidebarColor:'#c8c8c8',
     // Two concentric circles — person in guard/base
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>'},
-  sweep:     {label:'Sweep',     color:'#7c4fcf',bg:'#ede9f8',textColor:'#4a2d8a',
+  sweep:     {label:'Sweep',     color:'#7c4fcf',bg:'#ede9f8',textColor:'#4a2d8a',sidebarColor:'#a87de8',
     // Curved arc with arrowhead — rotational sweep motion
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17A9 9 0 0 1 19 7"/><polyline points="19 2 19 7 14 7"/></svg>'},
-  submission:{label:'Submission',color:'#1a1a1a',bg:'#2d2d2d',textColor:'#f0f0f0',
+  submission:{label:'Submission',color:'#1a1a1a',bg:'#2d2d2d',textColor:'#f0f0f0',sidebarColor:'#2a2a2a',
     // X mark — tap out / finish
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>'},
-  pass:      {label:'Pass',      color:'#1a4fa3',bg:'#dbeafe',textColor:'#1e3a7a',
+  pass:      {label:'Pass',      color:'#1a4fa3',bg:'#dbeafe',textColor:'#1e3a7a',sidebarColor:'#5b8fd4',
     // Double chevron right — forward passing motion
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 12 12 5 17"/><polyline points="13 7 20 12 13 17"/></svg>'},
-  escape:    {label:'Escape',    color:'#6b3f1f',bg:'#f5e6d8',textColor:'#4a2a10',
+  escape:    {label:'Escape',    color:'#6b3f1f',bg:'#f5e6d8',textColor:'#4a2a10',sidebarColor:'#c47a45',
     // Arrow breaking out of box — escape motion
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 9 15 12 10 15"/><path d="M4 4h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4"/><line x1="15" y1="12" x2="3" y2="12"/></svg>'},
-  takedown:  {label:'Takedown',  color:'#c17f2e',bg:'#fef3e2',textColor:'#7a4f18',
+  takedown:  {label:'Takedown',  color:'#c17f2e',bg:'#fef3e2',textColor:'#7a4f18',sidebarColor:'#d4943a',
     // Arrow pointing down with emphasis — drive to mat
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="6 15 12 21 18 15"/><line x1="6" y1="8" x2="18" y2="8"/></svg>'},
-  transition:{label:'Transition',color:'#0e7490',bg:'#ecfeff',textColor:'#0c4a6e',
+  transition:{label:'Transition',color:'#e6b800',bg:'#fffbe6',textColor:'#7a6000',sidebarColor:'#e6b800',
     // Two arrows forming a loop — flow between positions
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13a3 3 0 0 1 0 6H6"/><polyline points="4 6 4 9 7 12"/><polyline points="9 18 6 15 9 12"/></svg>'},
 };
@@ -1151,7 +1151,54 @@ async function fetchSugg(url){
 function applyName(name){if(!selId)return;nodes[selId].label=name;document.getElementById('dp-t').value=name;var el=document.getElementById(selId);var t=el&&el.querySelector('.ntitle');if(t)t.textContent=name;}
 function updType(val){if(!selId)return;var meta=META[val]||META.position;nodes[selId].type=val;nodes[selId].color=meta.color;nodes[selId].bg=meta.bg;refreshNode(selId);openDetail(selId);}
 function addNodeCenter(){snapshotForUndo();var r=wrap.getBoundingClientRect();addNode((r.width/2-px)/sc-95+(Math.random()-.5)*40,(r.height/2-py)/sc-55+(Math.random()-.5)*30);hideHint();}
-function setType(t,el){curType=t;var m=META[t]||META.position;curColor=m.color;curBg=m.bg;document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
+function chipColor(t){
+  var m=META[t]||META.position;
+  var col=m.sidebarColor||m.color;
+  var r=parseInt(col.slice(1,3),16);
+  var g=parseInt(col.slice(3,5),16);
+  var b=parseInt(col.slice(5,7),16);
+  return {col:col, r:r, g:g, b:b};
+}
+function applyChipActive(el,t){
+  var c=chipColor(t);
+  var isDark=(c.r+c.g+c.b)<120; // sum of RGB — very dark colors get white text
+  el.style.borderColor=c.col;
+  el.style.color=isDark?'#f0ede6':c.col;
+  el.style.background='rgba('+c.r+','+c.g+','+c.b+','+(isDark?'0.85':'0.2')+')';
+}
+function clearChipStyle(el){
+  el.style.background=''; el.style.borderColor=''; el.style.color='';
+}
+function setType(t,el){
+  curType=t;
+  var m=META[t]||META.position;
+  curColor=m.color; curBg=m.bg;
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.classList.remove('on');
+    clearChipStyle(c);
+  });
+  el.classList.add('on');
+  applyChipActive(el,t);
+}
+// Per-type hover colors on inactive chips
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.chip[data-type]').forEach(function(chip){
+      chip.addEventListener('mouseenter',function(){
+        if(!chip.classList.contains('on')){
+          var c=chipColor(chip.dataset.type);
+          var isDark=(c.r+c.g+c.b)<120;
+          chip.style.borderColor=c.col;
+          chip.style.color=isDark?'#d0cdc8':c.col;
+          chip.style.background='rgba('+c.r+','+c.g+','+c.b+','+(isDark?'0.75':'0.12')+')';
+        }
+      });
+      chip.addEventListener('mouseleave',function(){
+        if(!chip.classList.contains('on')) clearChipStyle(chip);
+      });
+    });
+  });
+})();
 function setSw(c,bg,el){curColor=c;curBg=bg;document.querySelectorAll('.sw').forEach(function(s){s.classList.remove('on');});el.classList.add('on');}
 function clearAll(){
   if(!Object.keys(nodes).length)return;
@@ -2169,6 +2216,11 @@ function loadTmpl(name){
     loadTmpl('sidecontrol');
   }
   applyT();
+  // Apply initial chip color for the default active type
+  (function(){
+    var firstChip=document.querySelector('.chip.on');
+    if(firstChip) applyChipActive(firstChip,'position');
+  })();
   // Clear undo stack after init so users can't undo into blank state
   setTimeout(function(){ _undoStack=[]; 
     var btn=document.getElementById('undo-btn');
