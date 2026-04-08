@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>GrappleMapper</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='10' r='7' fill='%236b46c1'/%3E%3Ccircle cx='22' cy='22' r='7' fill='%238b5cf6' opacity='.85'/%3E%3Cline x1='15' y1='15' x2='17' y2='17' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -129,10 +130,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .note-el{position:absolute;background:#fffde7;border:1px solid #e8d87a;border-radius:6px;box-shadow:2px 3px 8px rgba(0,0,0,.10);cursor:default;user-select:none;min-width:140px;min-height:80px;}
 .note-el .note-drag-bar{height:18px;background:#f5e97a;border-radius:5px 5px 0 0;cursor:move;display:flex;align-items:center;padding:0 6px;gap:4px}
 .note-el .note-drag-bar svg{opacity:.5;flex-shrink:0}
-.note-el .note-body{padding:6px 8px;font-size:11px;line-height:1.55;color:#5a4e00;white-space:pre-wrap;word-break:break-word;min-height:60px;outline:none;cursor:text;}
-#note-label-editor{position:absolute;display:none;z-index:602}
-#note-label-editor textarea{border:1.5px solid #b8a060;border-radius:6px;padding:5px 8px;font-size:11px;font-family:'Inter',sans-serif;background:#fffde7;color:#5a4e00;outline:none;resize:none;width:200px;min-height:80px;box-shadow:2px 3px 8px rgba(0,0,0,.12);line-height:1.55;caret-color:#b8a060}
-#group-label-editor input{border:none;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600;font-family:'Space Grotesk','Inter',sans-serif;background:rgba(6,182,212,.15);color:#0e7490;outline:1.5px solid #06b6d4;width:120px;text-align:center;box-shadow:none;caret-color:#06b6d4}
+.note-el .note-body{padding:6px 8px;font-size:11px;line-height:1.55;color:#5a4e00;white-space:pre-wrap;word-break:break-word;min-height:60px;cursor:default;}
+#group-label-editor input{border:none;border-radius:10px;padding:0 10px;font-size:11px;font-weight:700;font-family:'Space Grotesk','Inter',sans-serif;background:transparent;color:#fff;outline:none;box-shadow:none;caret-color:rgba(255,255,255,.8);text-align:left;height:20px;line-height:20px;}
 .group-btn-active{background:rgba(6,182,212,.18)!important;border-color:#06b6d4!important;color:#06b6d4!important}
 .note-btn-active{background:rgba(184,160,96,.18)!important;border-color:#b8a060!important;color:#b8a060!important}
 #badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:5px 6px 5px 16px;border-radius:20px;font-size:12px;font-weight:600;display:none;white-space:nowrap;box-shadow:var(--sh2);display:none;align-items:center;gap:8px;cursor:default}
@@ -156,12 +155,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 <body>
 <div id="bar">
   <div class="logo">
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="7" y="1" width="12" height="7" rx="3.5" fill="#8b5cf6"/>
-      <rect x="1" y="18" width="10" height="7" rx="3.5" fill="#c4b5f8"/>
-      <rect x="15" y="18" width="10" height="7" rx="3.5" fill="#c4b5f8"/>
-      <line x1="10" y1="8" x2="6" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="16" y1="8" x2="20" y2="18" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Top node pill -->
+      <rect x="6" y="2" width="16" height="8" rx="4" fill="#6b46c1"/>
+      <!-- Bottom-left node pill -->
+      <rect x="1" y="18" width="11" height="8" rx="4" fill="#8b5cf6" opacity=".75"/>
+      <!-- Bottom-right node pill -->
+      <rect x="16" y="18" width="11" height="8" rx="4" fill="#8b5cf6" opacity=".75"/>
+      <!-- Connector lines -->
+      <line x1="10" y1="10" x2="7"  y2="18" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="18" y1="10" x2="21" y2="18" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
     </svg>
     GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.8</span>
   </div>
@@ -235,16 +238,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <div class="ss">
         <div class="sl">How to use</div>
         <ul class="howto">
-          <li><b>Click</b> a node &#8594; turns purple (armed)</li>
-          <li><b>Click another node</b> &#8594; arrow drawn</li>
-          <li><b>Esc</b> or click armed node &#8594; cancel</li>
-          <li><b>Drag</b> node &#8594; move it</li>
-          <li><b>Double-click</b> node &#8594; edit details</li>
-          <li><b>Double-click</b> canvas &#8594; add node</li>
-          <li><b>Drag</b> canvas &#8594; marquee select</li>
-          <li><b>Del / Backspace</b> &#8594; delete selected</li>
-          <li><b>Click arrow</b> &#8594; delete connection</li>
-          <li><b>Double-click arrow</b> &#8594; add/edit label</li>
+          <li><b>Click</b> node → arm it &nbsp;·&nbsp; <b>click another</b> → connect</li>
+          <li><b>Double-click</b> node → edit &nbsp;·&nbsp; canvas → add node</li>
+          <li><b>Double-click</b> arrow → label it</li>
+          <li><b>Drag</b> canvas → marquee select</li>
+          <li><b>Del</b> → delete selected &nbsp;·&nbsp; <b>⌘Z</b> → undo</li>
         </ul>
       </div>
     </div>
@@ -290,12 +288,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
     <div id="group-marquee"></div>
     <div id="note-marquee"></div>
     <div id="group-label-editor" style="position:absolute;display:none;z-index:601"><input id="gle-input" placeholder="Group name…" autocomplete="off"></div>
-    <div id="note-label-editor"><textarea id="nle-input" placeholder="Write your note…"></textarea></div>
     <div id="badge"><span id="badge-txt"></span><button id="badge-del" onclick="deleteMsel()">Delete</button></div>
     <div id="cstatus"></div>
     <div id="arrow-label-editor"><input id="ale-input" placeholder="label..." /></div>
     <div id="toast"></div>
-    <div id="hint">Click a node to arm it &middot; click another to connect &middot; drag canvas to pan</div>
   </div>
 </div>
 <script>
@@ -518,7 +514,7 @@ wrap.addEventListener('dblclick',function(e){
   if(e.target.closest && e.target.closest('.node')) return;
   if(e.target.closest && e.target.closest('g')) return;
   var bg=e.target===wrap||e.target===canvas||e.target.id==='dotbg';
-  if(bg){snapshotForUndo();var c=toC(e.clientX,e.clientY);addNode(c.x-95,c.y-55);hideHint();}
+  if(bg){snapshotForUndo();var c=toC(e.clientX,e.clientY);addNode(c.x-95,c.y-55);}
 });
 window.addEventListener('mousemove',function(e){
   // ── Note resize ──
@@ -1291,7 +1287,7 @@ async function fetchSugg(url){
 }
 function applyName(name){if(!selId)return;nodes[selId].label=name;document.getElementById('dp-t').value=name;var el=document.getElementById(selId);var t=el&&el.querySelector('.ntitle');if(t)t.textContent=name;}
 function updType(val){if(!selId)return;var meta=META[val]||META.position;nodes[selId].type=val;nodes[selId].color=meta.color;nodes[selId].bg=meta.bg;refreshNode(selId);openDetail(selId);}
-function addNodeCenter(){snapshotForUndo();var r=wrap.getBoundingClientRect();addNode((r.width/2-px)/sc-95+(Math.random()-.5)*40,(r.height/2-py)/sc-55+(Math.random()-.5)*30);hideHint();}
+function addNodeCenter(){snapshotForUndo();var r=wrap.getBoundingClientRect();addNode((r.width/2-px)/sc-95+(Math.random()-.5)*40,(r.height/2-py)/sc-55+(Math.random()-.5)*30);}
 function chipColor(t){
   var m=META[t]||META.position;
   var col=m.sidebarColor||m.color;
@@ -1354,8 +1350,7 @@ function clearAll(){
   document.getElementById('badge').style.display='none';
   autoSave();
 }
-var hintGone=false;
-function hideHint(){if(hintGone)return;hintGone=true;var h=document.getElementById('hint');if(h){h.style.opacity='0';setTimeout(function(){h.remove();},500);}}
+function hideHint(){}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── NOTE SYSTEM ──
@@ -1422,12 +1417,33 @@ function renderNote(no){
     noteDragging={id:no.id, offX:c.x-no.x, offY:c.y-no.y};
   });
 
-  // Body click → select, dblclick → edit inline
+  // Body click → select, dblclick → edit inline (contenteditable)
   el.querySelector('.note-body').addEventListener('click',function(e){
     e.stopPropagation(); selectNote(no.id);
   });
   el.querySelector('.note-body').addEventListener('dblclick',function(e){
-    e.stopPropagation(); openNLE(no.id);
+    e.stopPropagation();
+    selectNote(no.id);
+    var body=el.querySelector('.note-body');
+    body.contentEditable='true';
+    body.style.cursor='text';
+    body.style.outline='none';
+    body.focus();
+    // Place cursor at click position
+    var range=document.caretRangeFromPoint?document.caretRangeFromPoint(e.clientX,e.clientY):null;
+    if(range){var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);}
+    body._noteId=no.id;
+    body.addEventListener('blur',function onBlur(){
+      body.contentEditable='false';
+      body.style.cursor='default';
+      var no2=notes.find(function(x){return x.id===body._noteId;});
+      if(no2){ no2.text=body.innerText||''; autoSave(); }
+      body.removeEventListener('blur',onBlur);
+    },{once:true});
+    body.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){ body.blur(); e.stopPropagation(); }
+      else e.stopPropagation();
+    });
   });
 
   // Right-click → delete
@@ -1475,44 +1491,31 @@ function deselectNote(){
 }
 
 function openNLE(noteId){
-  var no=notes.find(function(x){return x.id===noteId;}); if(!no) return;
-  var nleDiv=document.getElementById('note-label-editor');
-  var nle=document.getElementById('nle-input');
-  nle.value=no.text||'';
-  // Position over the note body
-  var el=document.getElementById(noteId);
-  if(!el) return;
-  var barH=18;
-  var nx=no.x*sc+px, ny=(no.y+barH)*sc+py;
-  nleDiv.style.left=nx+'px'; nleDiv.style.top=ny+'px';
-  nleDiv.style.display='block';
-  nle.style.width=(no.w*sc)+'px';
-  nle.style.height=((no.h-barH)*sc)+'px';
-  nle.style.fontSize=(11*sc)+'px';
-  nleDiv._nid=noteId;
-  setTimeout(function(){nle.focus();},20);
+  // Trigger inline editing on the note body directly
+  setTimeout(function(){
+    var el=document.getElementById(noteId); if(!el) return;
+    var body=el.querySelector('.note-body'); if(!body) return;
+    body.contentEditable='true';
+    body.style.cursor='text';
+    body.style.outline='none';
+    body.focus();
+    // Select all on new note (empty)
+    var range=document.createRange(); range.selectNodeContents(body);
+    var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    body._noteId=noteId;
+    body.addEventListener('blur',function onBlur(){
+      body.contentEditable='false';
+      body.style.cursor='default';
+      var no2=notes.find(function(x){return x.id===body._noteId;});
+      if(no2){ no2.text=body.innerText||''; autoSave(); }
+      body.removeEventListener('blur',onBlur);
+    },{once:true});
+    body.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){ body.blur(); e.stopPropagation(); }
+      else e.stopPropagation();
+    });
+  },50);
 }
-
-function closeNLE(save){
-  var nleDiv=document.getElementById('note-label-editor');
-  if(save&&nleDiv._nid){
-    var no=notes.find(function(x){return x.id===nleDiv._nid;});
-    if(no){
-      no.text=document.getElementById('nle-input').value||'';
-      renderNote(no); autoSave();
-    }
-  }
-  nleDiv.style.display='none'; nleDiv._nid=null;
-}
-
-(function(){
-  var nle=document.getElementById('nle-input');
-  nle.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){closeNLE(true); e.stopPropagation();}
-    else e.stopPropagation(); // let Enter create newlines
-  });
-  nle.addEventListener('blur',function(){closeNLE(true);});
-})();
 
 // ── END NOTE SYSTEM ──
 
@@ -1792,12 +1795,21 @@ function openGLE(groupId){
   var gle=document.getElementById('gle-input');
   var gleDiv=document.getElementById('group-label-editor');
   gle.value=g.label||'';
-  // Position over the label pill
-  var lx=g.x*sc+px+8, ly=(g.y-10)*sc+py;
+  // Size input to match pill exactly — pill starts at g.x+8, y-10, height=20
+  var LABEL_H=20, PAD=8;
+  var labelW=Math.max(60, g.label.length*7.5+PAD*2+20); // a bit wider for typing
+  var lx=(g.x+PAD)*sc+px;
+  var ly=(g.y-LABEL_H/2)*sc+py;
   gleDiv.style.left=lx+'px';
   gleDiv.style.top=ly+'px';
   gleDiv.style.display='block';
+  gle.style.width=Math.max(80,labelW*sc)+'px';
+  gle.style.height=(LABEL_H*sc)+'px';
+  gle.style.fontSize=(11*sc)+'px';
   gleDiv._gid=groupId;
+  // Hide the SVG text so input replaces it visually
+  var svgEl=document.getElementById(groupId);
+  if(svgEl){ var txt=svgEl.querySelector('text'); if(txt) txt.style.display='none'; }
   setTimeout(function(){gle.focus();gle.select();},20);
 }
 
@@ -1810,6 +1822,11 @@ function closeGLE(save){
       renderGroup(g);
       autoSave();
     }
+  }
+  // Restore SVG text visibility
+  if(gleDiv._gid){
+    var svgEl=document.getElementById(gleDiv._gid);
+    if(svgEl){ var txt=svgEl.querySelector('text'); if(txt) txt.style.display=''; }
   }
   gleDiv.style.display='none';
   gleDiv._gid=null;
