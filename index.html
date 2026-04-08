@@ -93,8 +93,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .node.pos-node .ndesc{display:none}
 .ninner{border-radius:11px;overflow:hidden}
 .nbar{height:4px}
-.nph{width:100%;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#f5f3f0;font-size:11px;color:var(--dmut)}
-.nph span{font-size:22px;opacity:.4}
+.nph{width:100%;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#f5f3f0}
+.nph svg{width:32px;height:32px;stroke:#b8b5b0;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nph-label{font-size:10px;font-weight:600;color:#c4c2be;letter-spacing:.06em;text-transform:uppercase}
 .nvthumb{width:calc(100% - 12px);aspect-ratio:16/9;background:center/cover #111;position:relative;cursor:pointer;margin:6px;border-radius:8px;overflow:hidden}
 .nvthumb::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.2)}
 .nvplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none}
@@ -283,13 +284,27 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 </div>
 <script>
 const META={
-  position:  {label:'Position',  color:'#e8e8e8',bg:'#f5f5f5',textColor:'#444',icon:'&#x1F94B;'},
-  sweep:     {label:'Sweep',     color:'#7c4fcf',bg:'#ede9f8',textColor:'#4a2d8a',icon:'&#x1F504;'},
-  submission:{label:'Submission',color:'#1a1a1a',bg:'#2d2d2d',textColor:'#f0f0f0',icon:'&#x1F512;'},
-  pass:      {label:'Pass',      color:'#1a4fa3',bg:'#dbeafe',textColor:'#1e3a7a',icon:'&#x25B6;'},
-  escape:    {label:'Escape',    color:'#6b3f1f',bg:'#f5e6d8',textColor:'#4a2a10',icon:'&#x1F4A8;'},
-  takedown:  {label:'Takedown',  color:'#c17f2e',bg:'#fef3e2',textColor:'#7a4f18',icon:'&#x2B07;'},
-  transition:{label:'Transition',color:'#0e7490',bg:'#ecfeff',textColor:'#0c4a6e',icon:'&#x21C4;'},
+  position:  {label:'Position',  color:'#e8e8e8',bg:'#f5f5f5',textColor:'#444',
+    // Two concentric circles — person in guard/base
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>'},
+  sweep:     {label:'Sweep',     color:'#7c4fcf',bg:'#ede9f8',textColor:'#4a2d8a',
+    // Curved arc with arrowhead — rotational sweep motion
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17A9 9 0 0 1 19 7"/><polyline points="19 2 19 7 14 7"/></svg>'},
+  submission:{label:'Submission',color:'#1a1a1a',bg:'#2d2d2d',textColor:'#f0f0f0',
+    // X mark — tap out / finish
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>'},
+  pass:      {label:'Pass',      color:'#1a4fa3',bg:'#dbeafe',textColor:'#1e3a7a',
+    // Double chevron right — forward passing motion
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 12 12 5 17"/><polyline points="13 7 20 12 13 17"/></svg>'},
+  escape:    {label:'Escape',    color:'#6b3f1f',bg:'#f5e6d8',textColor:'#4a2a10',
+    // Arrow breaking out of box — escape motion
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 9 15 12 10 15"/><path d="M4 4h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4"/><line x1="15" y1="12" x2="3" y2="12"/></svg>'},
+  takedown:  {label:'Takedown',  color:'#c17f2e',bg:'#fef3e2',textColor:'#7a4f18',
+    // Arrow pointing down with emphasis — drive to mat
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="6 15 12 21 18 15"/><line x1="6" y1="8" x2="18" y2="8"/></svg>'},
+  transition:{label:'Transition',color:'#0e7490',bg:'#ecfeff',textColor:'#0c4a6e',
+    // Two arrows forming a loop — flow between positions
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13a3 3 0 0 1 0 6H6"/><polyline points="4 6 4 9 7 12"/><polyline points="9 18 6 15 9 12"/></svg>'},
 };
 const SAMPLES={
   position:  ['Closed guard','Half guard','Side control','Mount','Back mount','Open guard','Turtle','X-guard','De La Riva','Butterfly guard'],
@@ -892,7 +907,7 @@ function mkNodeEl(id){
         +'</div>';
     }
   } else if(!isPill){
-    media='<div class="nph"><span>'+meta.icon+'</span>'+meta.label+'</div>';
+    media='<div class="nph">'+meta.icon+'<span class="nph-label">'+meta.label+'</span></div>';
   }
 
   var bar='<div class="nbar" style="background:'+n.color+';height:'+(isPill?'6':'4')+'px"></div>';
