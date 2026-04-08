@@ -196,13 +196,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
       <div class="ss">
         <div class="sl">Type</div>
         <div class="chips">
-          <button class="chip on" data-type="position" onclick="setType('position',this)">Position</button>
-          <button class="chip" data-type="sweep" onclick="setType('sweep',this)">Sweep</button>
           <button class="chip" data-type="submission" onclick="setType('submission',this)">Submission</button>
-          <button class="chip" data-type="pass" onclick="setType('pass',this)">Pass</button>
           <button class="chip" data-type="escape" onclick="setType('escape',this)">Escape</button>
+          <button class="chip" data-type="sweep" onclick="setType('sweep',this)">Sweep</button>
+          <button class="chip" data-type="pass" onclick="setType('pass',this)">Pass</button>
           <button class="chip" data-type="takedown" onclick="setType('takedown',this)">Takedown</button>
           <button class="chip" data-type="transition" onclick="setType('transition',this)">Transition</button>
+          <button class="chip on" data-type="position" onclick="setType('position',this)">Position</button>
         </div>
       </div>
       <div class="ss">
@@ -2218,8 +2218,8 @@ function loadTmpl(name){
   applyT();
   // Apply initial chip color for the default active type
   (function(){
-    var firstChip=document.querySelector('.chip.on');
-    if(firstChip) applyChipActive(firstChip,'position');
+    var activeChip=document.querySelector('.chip[data-type="position"]');
+    if(activeChip) applyChipActive(activeChip,'position');
   })();
   // Clear undo stack after init so users can't undo into blank state
   setTimeout(function(){ _undoStack=[]; 
