@@ -367,10 +367,10 @@ function parseIG(url){
 }
 function parseFB(url){
   if(!url) return null;
-  // facebook.com/watch?v=ID  or  facebook.com/*/videos/ID  or  fb.watch/CODE
-  const m=url.match(/(?:facebook\.com\/(?:watch\/?\?v=|[^/]+\/videos\/)(\d+)|fb\.watch\/([A-Za-z0-9_-]+))/);
+  // Matches: watch?v=ID, */videos/ID, fb.watch/CODE, share/r/CODE, share/v/CODE, share/CODE
+  const m=url.match(/facebook\.com\/(?:watch\/?\?v=(\d+)|[^/]+\/videos\/(\d+)|share\/(?:[rv]\/)?([A-Za-z0-9_-]+))|fb\.watch\/([A-Za-z0-9_-]+)/);
   if(!m) return null;
-  return m[1]||m[2]||null;
+  return m[1]||m[2]||m[3]||m[4]||null;
 }
 // Inject Instagram embed.js once
 var igScriptLoaded=false;
