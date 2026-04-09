@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>GrappleMapper</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='10' r='7' fill='%236b46c1'/%3E%3Ccircle cx='22' cy='22' r='7' fill='%238b5cf6' opacity='.85'/%3E%3Cline x1='15' y1='15' x2='17' y2='17' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231C1C1C'/><g transform='translate(-8.225,-5.079) scale(0.1573)' fill='none' stroke='%23fff'><path d='M 115 65 L 175 65 L 175 95 L 130 95 L 130 125 L 200 125 L 200 155 L 115 155 L 115 185 L 85 185 L 85 125 L 65 125 L 65 95 L 115 95 Z' stroke-width='14' stroke-linejoin='round'/><path d='M 140 81 L 165 81' stroke-width='7'/><path d='M 130 105 L 155 105 L 155 130 L 180 130 L 180 105 L 205 105' stroke-width='7'/><path d='M 100 180 L 125 155' stroke-width='7'/><path d='M 215 150 L 215 125' stroke-width='7'/></g><g transform='translate(-8.225,-5.079) scale(0.1573)' fill='%23fff'><rect x='122' y='72' width='18' height='18' rx='2'/><polygon points='165,77 175,81 165,85'/><polygon points='205,101 215,105 205,109'/><rect x='92' y='162' width='18' height='18' rx='2'/><polygon points='120,152 125,155 125,160'/><rect x='205' y='132' width='18' height='18' rx='2'/><polygon points='211,125 215,115 219,125'/><rect x='225' y='165' width='18' height='18' rx='2'/></g></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -156,18 +156,35 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 <body>
 <div id="bar">
   <div class="logo">
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Top node pill -->
-      <rect x="6" y="2" width="16" height="8" rx="4" fill="#6b46c1"/>
-      <!-- Bottom-left node pill -->
-      <rect x="1" y="18" width="11" height="8" rx="4" fill="#8b5cf6" opacity=".75"/>
-      <!-- Bottom-right node pill -->
-      <rect x="16" y="18" width="11" height="8" rx="4" fill="#8b5cf6" opacity=".75"/>
-      <!-- Connector lines -->
-      <line x1="10" y1="10" x2="7"  y2="18" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
-      <line x1="18" y1="10" x2="21" y2="18" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(-7.494,-4.573) scale(0.1461)">
+        <!-- Outer flow path -->
+        <path d="M 115 65 L 175 65 L 175 95 L 130 95 L 130 125 L 200 125 L 200 155 L 115 155 L 115 185 L 85 185 L 85 125 L 65 125 L 65 95 L 115 95 Z"
+              fill="none" stroke="#fff" stroke-width="14" stroke-linejoin="round"/>
+        <!-- Top-left node -->
+        <rect x="122" y="72" width="18" height="18" rx="2" fill="#fff"/>
+        <!-- Top arrow shaft + head -->
+        <path d="M 140 81 L 165 81" stroke="#fff" stroke-width="7"/>
+        <polygon points="165,77 175,81 165,85" fill="#fff"/>
+        <!-- Middle zig-zag + arrow -->
+        <path d="M 130 105 L 155 105 L 155 130 L 180 130 L 180 105 L 205 105"
+              stroke="#fff" stroke-width="7" fill="none"/>
+        <polygon points="205,101 215,105 205,109" fill="#fff"/>
+        <!-- Bottom-left node -->
+        <rect x="92" y="162" width="18" height="18" rx="2" fill="#fff"/>
+        <!-- Diagonal arrow -->
+        <path d="M 100 180 L 125 155" stroke="#fff" stroke-width="7"/>
+        <polygon points="120,152 125,155 125,160" fill="#fff"/>
+        <!-- Right-side node -->
+        <rect x="205" y="132" width="18" height="18" rx="2" fill="#fff"/>
+        <!-- Upward arrow -->
+        <path d="M 215 150 L 215 125" stroke="#fff" stroke-width="7"/>
+        <polygon points="211,125 215,115 219,125" fill="#fff"/>
+        <!-- Bottom-right node -->
+        <rect x="225" y="165" width="18" height="18" rx="2" fill="#fff"/>
+      </g>
     </svg>
-    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--mut);letter-spacing:0;font-family:'Inter',sans-serif">v4.8</span>
+    GrappleMapper <span style="font-size:11px;font-weight:500;color:var(--dmut);letter-spacing:0;font-family:'Inter',sans-serif">v4.8</span>
   </div>
   <input id="ftitle" value="My BJJ System" spellcheck="false">
   <div class="sp"></div>
