@@ -1,32 +1,22 @@
-const CACHE = 'grapplemapper-v3.2';
-const PRECACHE = ['index.html','manifest.json','icons/icon-192.png','icons/icon-512.png'];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
-});
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
-    .then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', e => {
-  const url = e.request.url;
-  if (e.request.method !== 'GET') return;
-  if (url.startsWith('blob:') || url.startsWith('data:')) return;
-  if (url.includes('youtube') || url.includes('instagram') ||
-      url.includes('googleapis') || url.includes('oembed') || url.includes('fonts.g')) return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (res.ok && res.type === 'basic') {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-        }
-        return res;
-      }).catch(() => caches.match('index.html'));
-    })
-  );
-});
+{
+  "name": "GrappleMapper",
+  "short_name": "GrappleMapper",
+  "description": "BJJ technique flowchart builder",
+  "start_url": "/grapplemapper/",
+  "scope": "/grapplemapper/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1C1C1C",
+  "theme_color": "#3e3c39",
+  "icons": [
+    { "src": "icons/icon-72.png",  "sizes": "72x72",   "type": "image/png" },
+    { "src": "icons/icon-96.png",  "sizes": "96x96",   "type": "image/png" },
+    { "src": "icons/icon-128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
