@@ -1,22 +1,50 @@
-{
-  "name": "GrappleMapper",
-  "short_name": "GrappleMapper",
-  "description": "BJJ technique flowchart builder",
-  "start_url": "/grapplemapper/",
-  "scope": "/grapplemapper/",
-  "display": "standalone",
-  "orientation": "any",
-  "background_color": "#1C1C1C",
-  "theme_color": "#3e3c39",
-  "icons": [
-    { "src": "icons/icon-72.png",  "sizes": "72x72",   "type": "image/png" },
-    { "src": "icons/icon-96.png",  "sizes": "96x96",   "type": "image/png" },
-    { "src": "icons/icon-128.png", "sizes": "128x128", "type": "image/png" },
-    { "src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png" },
-    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png" },
-    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
-}
+const CACHE = 'grapplemapper-v4.8';
+const APP_SHELL = [
+  '/grapplemapper/',
+  '/grapplemapper/index.html',
+  '/grapplemapper/manifest.json',
+];
+
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(CACHE).then(function(c) {
+      return c.addAll(APP_SHELL);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE; })
+            .map(function(k) { return caches.delete(k); })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', function(e) {
+  var url = e.request.url;
+  if (url.includes('youtube.com') || url.includes('googleapis.com') ||
+      url.includes('instagram.com') || url.includes('facebook.com') ||
+      url.includes('google.com/oembed')) {
+    e.respondWith(
+      fetch(e.request).catch(function() {
+        return caches.match(e.request);
+      })
+    );
+    return;
+  }
+  e.respondWith(
+    caches.match(e.request).then(function(cached) {
+      return cached || fetch(e.request).then(function(resp) {
+        var clone = resp.clone();
+        caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+        return resp;
+      });
+    })
+  );
+});
