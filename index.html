@@ -162,7 +162,7 @@ button.zr-fit{display:none}
 /* ── MOBILE ── */
 @media(max-width:680px){
   /* Topbar: logo left, buttons pushed to right */
-  #bar{justify-content:space-between}
+  #bar{justify-content:space-between;padding:0 8px}
   .logo{width:auto!important;flex-shrink:0}
   .logo-text{display:none}
   #ftitle{display:none}
@@ -292,7 +292,7 @@ button.zr-fit{display:none}
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none"/><polyline points="14 2 14 8 20 8" fill="none"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
   </button>
   <!-- Marquee select — mobile only -->
-  <button class="icon-btn" id="mob-marquee-btn" onclick="toggleMobMarquee()" title="Select area" style="display:none">
+  <button class="icon-btn" id="mob-marquee-btn" onclick="toggleMobMarquee()" title="Select area">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4,2.5" fill="none"/><polyline points="9 9 9 15 15 15"/></svg>
   </button>
   <!-- Fit — always visible, moves into button group on mobile -->
@@ -536,7 +536,15 @@ function toggleSidebar(){
 function toggleMobileSidebar(){ toggleSidebar(); }
 
 var _mobMarqueeMode=false;
+var _marqueeExitedAt=0;
+function exitMarqueeMode(){
+  _mobMarqueeMode=false;
+  _marqueeExitedAt=Date.now();
+  var btn=document.getElementById('mob-marquee-btn');
+  if(btn) btn.classList.remove('mob-marquee-active');
+}
 function toggleMobMarquee(){
+  if(Date.now()-_marqueeExitedAt<350){ return; } // suppress re-toggle from click firing after touchend
   _mobMarqueeMode=!_mobMarqueeMode;
   var btn=document.getElementById('mob-marquee-btn');
   if(btn) btn.classList.toggle('mob-marquee-active',_mobMarqueeMode);
@@ -3154,6 +3162,8 @@ function loadTmpl(name){
     var tgt=document.elementFromPoint(t.clientX,t.clientY);
     // If touching a playing video frame — let browser/iframe handle it natively
     if(tgt&&(tgt.closest('.nvframe')||tgt.closest('.scroll-shield'))) return;
+    // If touching an overlay UI element inside #wrap — let it handle natively
+    if(tgt&&(tgt.closest('#badge')||tgt.closest('#mob-howto')||tgt.closest('#toast')||tgt.closest('#cstatus'))) return;
     var nodeDiv=tgt&&tgt.closest('.node');
 
     // Double-tap detection
@@ -3309,11 +3319,9 @@ function loadTmpl(name){
         document.getElementById('badge-txt').textContent=msel.size+' node'+(msel.size>1?'s':'')+' selected';
         b.style.display='flex';
       }
-      // Exit marquee mode after selection
-      _mobMarqueeMode=false;
-      var btn=document.getElementById('mob-marquee-btn');
-      if(btn) btn.classList.remove('mob-marquee-active');
     }
+    // Always exit marquee mode on touchend
+    if(_mobMarqueeMode){ exitMarqueeMode(); }
     _longPressFired=false;
     _touchPanSt=null; _panMoved=false;
   },{passive:false});
