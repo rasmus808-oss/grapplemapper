@@ -213,7 +213,7 @@ button.zr-fit{display:none}
   position:fixed;
   bottom:52px; /* above the 40px drag handle + a gap */
   left:12px;right:12px;
-  background:rgba(28,26,24,.90);
+  background:rgba(28,26,24,.9);
   border:1px solid var(--dbord);
   border-radius:16px;
   padding:14px 16px 12px;
@@ -1615,11 +1615,17 @@ function dismissMobHowto(){
   if(el){ el.style.animation='howto-slide .2s reverse forwards'; setTimeout(function(){el.style.display='none';},200); }
 }
 (function initMobHowto(){
-  // Only on mobile-width screens
   if(window.innerWidth>680) return;
   try{ if(localStorage.getItem('gm-howto-seen')) return; }catch(e){}
   var el=document.getElementById('mob-howto');
-  if(el) el.style.display='block';
+  if(!el) return;
+  el.style.display='block';
+  // Stop touches on the overlay reaching wrap's listeners
+  el.addEventListener('touchstart',function(e){e.stopPropagation();},{passive:true});
+  el.addEventListener('touchend',function(e){e.stopPropagation();},{passive:true});
+  // Also wire dismiss button via touchend so it fires even if onclick is swallowed
+  var btn=document.getElementById('mob-howto-dismiss');
+  if(btn) btn.addEventListener('touchend',function(e){e.stopPropagation();dismissMobHowto();},{passive:true});
 }());
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
