@@ -1,4 +1,4 @@
-const CACHE = 'grapplemapper-v5.0';
+const CACHE = 'grapplemapper-v5.1';
 const APP_SHELL = [
   '/grapplemapper/',
   '/grapplemapper/index.html',
