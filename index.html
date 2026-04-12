@@ -1258,7 +1258,7 @@ function mkNodeEl(id){
   if(hasVideo){
     if(ytId){
       if(n.playing){
-        var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?rel=0&modestbranding=1&playsinline=1&enablejsapi=1';
+        var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&autoplay=1';
         media='<div class="nvframe" style="aspect-ratio:'+aspectStr+';width:calc(100% - 12px)">'
           +'<iframe id="ytf-'+id+'" src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
           +'<div class="scroll-shield" onwheel="canvasWheel(event)"></div>'
@@ -1356,10 +1356,6 @@ function attachEv(el,id){
       } else if(parseFB(nodes[id].url)){
         window.open(nodes[id].url, '_blank');
       } else {
-        // On mobile open YouTube natively — iOS blocks autoplay in iframes
-        if(window.innerWidth<=1024){
-          window.open(nodes[id].url,'_blank'); return;
-        }
         // Save pre-play dimensions
         var elNow=document.getElementById(id);
         if(elNow) nodes[id].prePlayW=nodes[id].w||190;
