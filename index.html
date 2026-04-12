@@ -76,7 +76,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 .field input:focus,.field textarea:focus{border-color:var(--acc)}
 .field textarea{resize:vertical;min-height:52px}
 .field select option{background:var(--dark2);color:var(--dtext)}
-#vpreview{width:100%;aspect-ratio:16/9;border-radius:8px;background:#111 center/cover;margin-bottom:10px;display:none;cursor:pointer}
+#vpreview{width:60px;height:34px;border-radius:6px;background:#111 center/cover;margin-bottom:10px;display:none;cursor:pointer;flex-shrink:0}
 #name-suggestions{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px}
 .nchip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;background:rgba(107,70,193,.2);color:#c4b5f8;border:1px solid rgba(107,70,193,.4);cursor:pointer;transition:all .15s}
 .nchip:hover{background:var(--acc);color:#fff}
@@ -364,7 +364,9 @@ button.zr-fit{display:none}
           <div id="name-suggestions"></div>
         </div>
         <div class="field"><label>Video URL (YouTube / Instagram / Facebook)</label>
-          <input id="dp-u" placeholder="https://youtube.com/watch?v=..." oninput="onUrl(this.value)">
+          <div style="display:flex;align-items:center;gap:6px">
+            <input id="dp-u" placeholder="https://youtube.com/watch?v=..." oninput="onUrl(this.value)" style="flex:1;min-width:0">
+          </div>
         </div>
         <div class="field"><label>Description</label>
           <textarea id="dp-d" placeholder="Notes..." oninput="updN('desc',this.value)"></textarea>
@@ -1490,8 +1492,16 @@ function openDetail(id){
   document.getElementById('name-suggestions').innerHTML='';
   var ytId=parseYT(n.url);
   var vp=document.getElementById('vpreview');
-  if(ytId){vp.style.display='block';vp.style.backgroundImage='url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')';vp.onclick=function(){window.open(n.url,'_blank');};}
-  else{vp.style.display='none';vp.onclick=null;}
+  var urlRow=document.getElementById('dp-u').parentElement;
+  if(ytId){
+    vp.style.display='block';
+    vp.style.backgroundImage='url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\')';
+    vp.onclick=null;
+    urlRow.insertBefore(vp, urlRow.firstChild);
+  } else {
+    vp.style.display='none';
+    vp.onclick=null;
+  }
 }
 function updN(field,val){
   if(!selId) return; nodes[selId][field]=val;
@@ -3314,7 +3324,15 @@ function loadTmpl(name){
           var igId=parseIG(nodes[id].url);
           if(igId){ window.open('https://www.instagram.com/p/'+igId+'/', '_blank'); }
           else if(parseFB(nodes[id].url)){ window.open(nodes[id].url, '_blank'); }
-          else { window.open(nodes[id].url, '_blank'); }
+          else {
+            // YouTube — play inline
+            var elNow=document.getElementById(id);
+            if(elNow) nodes[id].prePlayW=nodes[id].w||190;
+            nodes[id].prePlayH=nodes[id].h||120;
+            nodes[id].playing=true;
+            refreshNode(id);
+            setTimeout(function(){var el2=document.getElementById(id);if(el2){nodes[id].h=el2.offsetHeight||120;redrawArrows();}},100);
+          }
         } else if(onStop){
           nodes[id].playing=false;
           if(nodes[id].prePlayW) nodes[id].w=nodes[id].prePlayW;
