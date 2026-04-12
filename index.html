@@ -568,6 +568,9 @@ function toggleMobMarquee(){
 
   var HANDLE_H=40;
   var dragging=false, startY=0, startH=0, currentH=HANDLE_H;
+  var MAX_H=getMaxH();
+
+  function getSbH(){ return sb.offsetHeight||HANDLE_H; }
 
   function getMaxH(){
     // Fit content, cap at 75vh, never more than leaves 120px for canvas
@@ -578,7 +581,7 @@ function toggleMobMarquee(){
   }
 
   function snapSidebar(open){
-    var MAX_H=getMaxH();
+    MAX_H=getMaxH();
     sb.style.transition='height .3s cubic-bezier(.4,0,.2,1)';
     if(open){
       sb.style.height=MAX_H+'px'; sb.classList.add('sb-open'); currentH=MAX_H;
@@ -2711,71 +2714,71 @@ var TMPLS={
   half:{title:'Half Guard System',
     nodes:[
       // ── ENTRY ──
-      {id:'n1', x:408, y:42,   type:'position',   label:'Half guard (bottom)',    desc:'Control far knee, fight for underhook, look for deep half entry.'},
+      {id:'n1', x:1040, y:60,   type:'position',   label:'Half guard (bottom)',    desc:'Control far knee, fight for underhook, look for deep half entry.'},
 
       // ── BOTTOM GUARD VARIATIONS ──
-      {id:'n2', x:372,  y:217,  type:'position',   label:'Lockdown',              desc:'Figure-four legs on ankle, stretch opponent, control hips.'},
-      {id:'n3', x:1002,  y:217,  type:'position',   label:'Underhook half',        desc:'Secure underhook, knee shield up, prevent crossface.'},
-      {id:'n4', x:162, y:217,  type:'position',   label:'Z-guard / knee shield', desc:'Knee framing into hip, create space and off-balance.'},
-      {id:'n5', x:1002, y:217,  type:'position',   label:'Deep half guard',       desc:'Dive under, grab far leg, head under hip, elevate.'},
-      {id:'n6', x:1632, y:217,  type:'position',   label:'Dogfight position',     desc:'Both up on knees, underhook and overhook battle.'},
-      {id:'n37',x:2052, y:217,  type:'position',   label:'Quarter guard',         desc:'Opponent has almost passed — one leg trapped, hips flat, fight to recover.'},
+      {id:'n2', x:-80,  y:310,  type:'position',   label:'Lockdown',              desc:'Figure-four legs on ankle, stretch opponent, control hips.'},
+      {id:'n3', x:480,  y:310,  type:'position',   label:'Underhook half',        desc:'Secure underhook, knee shield up, prevent crossface.'},
+      {id:'n4', x:1040, y:310,  type:'position',   label:'Z-guard / knee shield', desc:'Knee framing into hip, create space and off-balance.'},
+      {id:'n5', x:1600, y:310,  type:'position',   label:'Deep half guard',       desc:'Dive under, grab far leg, head under hip, elevate.'},
+      {id:'n6', x:2160, y:310,  type:'position',   label:'Dogfight position',     desc:'Both up on knees, underhook and overhook battle.'},
+      {id:'n37',x:2720, y:310,  type:'position',   label:'Quarter guard',         desc:'Opponent has almost passed — one leg trapped, hips flat, fight to recover.'},
 
       // ── LOCKDOWN ATTACKS ──
-      {id:'n7', x:1632,  y:392,  type:'sweep',      label:'Electric chair sweep',  desc:'Stretch lockdown, overhook far leg, sit up and roll.'},
-      {id:'n8', x:2052,  y:392,  type:'sweep',      label:'Old school sweep',      desc:'Grab back of knee, sit up and shrimp out to top.'},
+      {id:'n7', x:-80,  y:560,  type:'sweep',      label:'Electric chair sweep',  desc:'Stretch lockdown, overhook far leg, sit up and roll.'},
+      {id:'n8', x:200,  y:560,  type:'sweep',      label:'Old school sweep',      desc:'Grab back of knee, sit up and shrimp out to top.'},
 
       // ── UNDERHOOK ATTACKS ──
-      {id:'n9', x:1422,  y:392,  type:'sweep',      label:'Sit-up sweep',          desc:'Underhook, post foot, drive into opponent, come on top.'},
-      {id:'n10',x:2472,  y:567,  type:'takedown',   label:'Single leg takedown',   desc:'Underhook becomes single leg, run the pipe or trip.'},
-      {id:'n11',x:2262,  y:742, type:'transition',  label:'Back take (underhook)', desc:'Opponent sprawls — step behind, take the back.'},
+      {id:'n9', x:480,  y:560,  type:'sweep',      label:'Sit-up sweep',          desc:'Underhook, post foot, drive into opponent, come on top.'},
+      {id:'n10',x:480,  y:810,  type:'takedown',   label:'Single leg takedown',   desc:'Underhook becomes single leg, run the pipe or trip.'},
+      {id:'n11',x:480,  y:1060, type:'transition',  label:'Back take (underhook)', desc:'Opponent sprawls — step behind, take the back.'},
 
       // ── KIMURA SYSTEM ──
-      {id:'n21',x:2052,  y:392,  type:'submission', label:'Kimura grip',           desc:'Figure-four on wrist from bottom, control the arm.'},
-      {id:'n22',x:2892,  y:567,  type:'submission', label:'Kimura finish',         desc:'Rotate shoulder, bring elbow past the hip, extend.'},
-      {id:'n23',x:2472,  y:742, type:'transition',  label:'Kimura to back',       desc:'Opponent defends — use kimura grip to roll to back.'},
-      {id:'n24',x:3102, y:567,  type:'submission', label:'Straight arm lock',     desc:'Kimura grip — extend arm straight for arm lock variation.'},
+      {id:'n21',x:760,  y:560,  type:'submission', label:'Kimura grip',           desc:'Figure-four on wrist from bottom, control the arm.'},
+      {id:'n22',x:760,  y:810,  type:'submission', label:'Kimura finish',         desc:'Rotate shoulder, bring elbow past the hip, extend.'},
+      {id:'n23',x:760,  y:1060, type:'transition',  label:'Kimura to back',       desc:'Opponent defends — use kimura grip to roll to back.'},
+      {id:'n24',x:1040, y:810,  type:'submission', label:'Straight arm lock',     desc:'Kimura grip — extend arm straight for arm lock variation.'},
 
       // ── Z-GUARD / KNEE SHIELD ATTACKS ──
-      {id:'n12',x:2682, y:392,  type:'sweep',      label:'Push-kick sweep',       desc:'Frame knee into hip, extend leg explosively, sweep forward.'},
-      {id:'n13',x:2472, y:392,  type:'transition',  label:'Enter deep half',      desc:'Knee shield creates space — dive under into deep half.'},
+      {id:'n12',x:1040, y:560,  type:'sweep',      label:'Push-kick sweep',       desc:'Frame knee into hip, extend leg explosively, sweep forward.'},
+      {id:'n13',x:1320, y:560,  type:'transition',  label:'Enter deep half',      desc:'Knee shield creates space — dive under into deep half.'},
 
       // ── DEEP HALF ATTACKS ──
-      {id:'n14',x:2682, y:392,  type:'sweep',      label:'Homer Simpson sweep',   desc:'Grab ankle, sit up under hip, roll opponent over the top.'},
-      {id:'n15',x:3312, y:567,  type:'sweep',      label:'Waiter sweep',          desc:'Control far leg like a waiter tray, elevate and come up.'},
-      {id:'n16',x:2682, y:742, type:'transition',  label:'Back take (deep half)', desc:'Opponent postures — use far leg to rotate to the back.'},
+      {id:'n14',x:1600, y:560,  type:'sweep',      label:'Homer Simpson sweep',   desc:'Grab ankle, sit up under hip, roll opponent over the top.'},
+      {id:'n15',x:1600, y:810,  type:'sweep',      label:'Waiter sweep',          desc:'Control far leg like a waiter tray, elevate and come up.'},
+      {id:'n16',x:1600, y:1060, type:'transition',  label:'Back take (deep half)', desc:'Opponent postures — use far leg to rotate to the back.'},
 
       // ── DOGFIGHT ATTACKS ──
-      {id:'n17',x:2892, y:392,  type:'takedown',   label:'Single leg finish',     desc:'Secure single leg in dogfight, trip or run the pipe.'},
-      {id:'n18',x:3732, y:567,  type:'sweep',      label:'Motorcycle sweep',      desc:'Drop to hip, hook leg, drive through and come on top.'},
-      {id:'n19',x:2892, y:742, type:'transition',  label:'Back take (dogfight)',  desc:'Snap opponent down, step behind, hooks in.'},
-      {id:'n20',x:3522, y:567,  type:'sweep',      label:'Outside trip',          desc:'Underhook, step outside leg, trip backward to mat.'},
+      {id:'n17',x:2160, y:560,  type:'takedown',   label:'Single leg finish',     desc:'Secure single leg in dogfight, trip or run the pipe.'},
+      {id:'n18',x:2160, y:810,  type:'sweep',      label:'Motorcycle sweep',      desc:'Drop to hip, hook leg, drive through and come on top.'},
+      {id:'n19',x:2160, y:1060, type:'transition',  label:'Back take (dogfight)',  desc:'Snap opponent down, step behind, hooks in.'},
+      {id:'n20',x:1880, y:810,  type:'sweep',      label:'Outside trip',          desc:'Underhook, step outside leg, trip backward to mat.'},
 
       // ── QUARTER GUARD ATTACKS ──
-      {id:'n38',x:3102, y:392,  type:'escape',     label:'Shrimp & reguard',      desc:'Hip escape hard into opponent, knee inside, recover full half guard.'},
-      {id:'n39',x:3312, y:392,  type:'escape',     label:'Granby roll',           desc:'Roll away on shoulder, invert under, recover butterfly or open guard.'},
-      {id:'n40',x:3942, y:567,  type:'submission', label:'Kimura from bottom',    desc:'Trap near arm in figure-four, threaten kimura before they settle.'},
-      {id:'n41',x:4152, y:567,  type:'transition',  label:'Turtle up',            desc:'Give up the position, roll to turtle — defend and look for reversal.'},
-      {id:'n42',x:3102, y:742, type:'transition',  label:'Frame & re-half',      desc:'Stiff-arm into hip or throat, create enough space to pull knee back in.'},
-      {id:'n43',x:3312, y:742, type:'escape',     label:'Lockdown from quarter', desc:'Secure figure-four on ankle before they fully pass — drag back to lockdown.'},
+      {id:'n38',x:2720, y:560,  type:'escape',     label:'Shrimp & reguard',      desc:'Hip escape hard into opponent, knee inside, recover full half guard.'},
+      {id:'n39',x:3000, y:560,  type:'escape',     label:'Granby roll',           desc:'Roll away on shoulder, invert under, recover butterfly or open guard.'},
+      {id:'n40',x:2720, y:810,  type:'submission', label:'Kimura from bottom',    desc:'Trap near arm in figure-four, threaten kimura before they settle.'},
+      {id:'n41',x:3000, y:810,  type:'transition',  label:'Turtle up',            desc:'Give up the position, roll to turtle — defend and look for reversal.'},
+      {id:'n42',x:2720, y:1060, type:'transition',  label:'Frame & re-half',      desc:'Stiff-arm into hip or throat, create enough space to pull knee back in.'},
+      {id:'n43',x:3000, y:1060, type:'escape',     label:'Lockdown from quarter', desc:'Secure figure-four on ankle before they fully pass — drag back to lockdown.'},
 
       // ── TOP HALF GUARD ──
-      {id:'n25',x:456,  y:917, type:'position',   label:'Top half guard',        desc:'Win the underhook battle or crossface — look to pass.'},
+      {id:'n25',x:760,  y:1310, type:'position',   label:'Top half guard',        desc:'Win the underhook battle or crossface — look to pass.'},
 
       // ── TOP HALF PASSING ──
-      {id:'n26',x:120,  y:1092, type:'pass',       label:'Underhook whip-up',     desc:'Win underhook, walk to back side, pass to side control.'},
-      {id:'n27',x:456,  y:1092, type:'pass',       label:'Smash pass',            desc:'Crossface, drive hip to mat, extract knee, side control.'},
-      {id:'n28',x:792, y:1092, type:'pass',       label:'Tilt pass',             desc:'Head and arm, tilt opponent to back, slide knee free.'},
-      {id:'n29',x:1128, y:1092, type:'pass',       label:'Back step pass',        desc:'Back step over bottom leg, spin to back or side control.'},
-      {id:'n30',x:1338, y:917, type:'submission', label:'Kimura from top',       desc:'Isolate near arm in figure-four, rotate shoulder.'},
+      {id:'n26',x:200,  y:1560, type:'pass',       label:'Underhook whip-up',     desc:'Win underhook, walk to back side, pass to side control.'},
+      {id:'n27',x:760,  y:1560, type:'pass',       label:'Smash pass',            desc:'Crossface, drive hip to mat, extract knee, side control.'},
+      {id:'n28',x:1320, y:1560, type:'pass',       label:'Tilt pass',             desc:'Head and arm, tilt opponent to back, slide knee free.'},
+      {id:'n29',x:1880, y:1560, type:'pass',       label:'Back step pass',        desc:'Back step over bottom leg, spin to back or side control.'},
+      {id:'n30',x:2160, y:1310, type:'submission', label:'Kimura from top',       desc:'Isolate near arm in figure-four, rotate shoulder.'},
 
       // ── OUTCOMES ──
-      {id:'n31',x:120,  y:1267, type:'position',   label:'Side control',          desc:'Crossface and hip pressure — pass complete.'},
-      {id:'n32',x:456,  y:1267, type:'position',   label:'Mount',                 desc:'Walk knees up from side control.'},
-      {id:'n33',x:792, y:1267, type:'position',   label:'Back mount',            desc:'Back step complete — establish hooks and seat belt.'},
-      {id:'n34',x:1128, y:917, type:'position',   label:'Back control',          desc:'Back take complete — seat belt, both hooks in.'},
-      {id:'n35',x:1128, y:1267, type:'submission', label:'Rear naked choke',      desc:'Slide arm under chin, figure-four, squeeze and extend.'},
-      {id:'n36',x:1338, y:1267, type:'submission', label:'Bow and arrow choke',   desc:'Deep collar grip, pull far knee, extend the body.'},
+      {id:'n31',x:200,  y:1810, type:'position',   label:'Side control',          desc:'Crossface and hip pressure — pass complete.'},
+      {id:'n32',x:760,  y:1810, type:'position',   label:'Mount',                 desc:'Walk knees up from side control.'},
+      {id:'n33',x:1320, y:1810, type:'position',   label:'Back mount',            desc:'Back step complete — establish hooks and seat belt.'},
+      {id:'n34',x:1880, y:1310, type:'position',   label:'Back control',          desc:'Back take complete — seat belt, both hooks in.'},
+      {id:'n35',x:1880, y:1810, type:'submission', label:'Rear naked choke',      desc:'Slide arm under chin, figure-four, squeeze and extend.'},
+      {id:'n36',x:2160, y:1810, type:'submission', label:'Bow and arrow choke',   desc:'Deep collar grip, pull far knee, extend the body.'},
     ],
     arrows:[
       // Entry to guard variations
@@ -2819,31 +2822,31 @@ var TMPLS={
   },
   mount:{title:'Full Mount Attack Tree',
     nodes:[
-      {id:'n1',x:408, y:21,  type:'position',   label:'Low mount',          desc:'Establish base, hook the hips.'},
-      {id:'n2',x:372,  y:196, type:'position',   label:'High mount',         desc:'Walk knees up to armpits.'},
-      {id:'n3',x:1002, y:196, type:'position',   label:'S-mount',            desc:'Rotate to isolate arm for armbar.'},
-      {id:'n4',x:162,  y:371, type:'submission', label:'Cross collar choke', desc:'Four fingers deep, drive second hand.'},
-      {id:'n5',x:1002, y:371, type:'submission', label:'Ezekiel choke',      desc:'Sleeve choke using forearm.'},
-      {id:'n6',x:1632, y:371, type:'submission', label:'Armbar',             desc:'Step over head, extend the elbow.'},
-      {id:'n7',x:1632, y:546, type:'submission', label:'Triangle choke',     desc:'Leg over, lock triangle.'},
-      {id:'n8',x:2052, y:546, type:'submission', label:'Omoplata',           desc:'Hip escape, shoulder lock.'},
+      {id:'n1',x:330, y:30,  type:'position',   label:'Low mount',          desc:'Establish base, hook the hips.'},
+      {id:'n2',x:80,  y:280, type:'position',   label:'High mount',         desc:'Walk knees up to armpits.'},
+      {id:'n3',x:580, y:280, type:'position',   label:'S-mount',            desc:'Rotate to isolate arm for armbar.'},
+      {id:'n4',x:20,  y:530, type:'submission', label:'Cross collar choke', desc:'Four fingers deep, drive second hand.'},
+      {id:'n5',x:260, y:530, type:'submission', label:'Ezekiel choke',      desc:'Sleeve choke using forearm.'},
+      {id:'n6',x:500, y:530, type:'submission', label:'Armbar',             desc:'Step over head, extend the elbow.'},
+      {id:'n7',x:130, y:780, type:'submission', label:'Triangle choke',     desc:'Leg over, lock triangle.'},
+      {id:'n8',x:420, y:780, type:'submission', label:'Omoplata',           desc:'Hip escape, shoulder lock.'},
     ],
     arrows:[['n1','n2'],['n1','n3'],['n2','n4'],['n2','n5'],['n3','n6'],['n4','n7'],['n5','n7'],['n6','n8']],
   },
   closed:{title:'Closed Guard Attacks',
     nodes:[
-      {id:'n1', x:408, y:21,  type:'position',   label:'Closed guard',     desc:'Break posture, control sleeves and collar.'},
-      {id:'n2', x:372,  y:196, type:'sweep',       label:'Hip bump sweep',   desc:'Sit up, post hand, drive hip into opponent.'},
-      {id:'n3', x:1002, y:196, type:'sweep',       label:'Scissor sweep',    desc:'Knee across belly, foot on hip, pull and push.'},
-      {id:'n4', x:162, y:196, type:'sweep',       label:'Pendulum sweep',   desc:'Overhook arm, foot on hip, pendulum leg.'},
-      {id:'n5', x:1002,  y:371, type:'submission',  label:'Kimura',           desc:'Trap wrist, figure-four grip, rotate shoulder.'},
-      {id:'n6', x:1632, y:371, type:'submission',  label:'Guillotine',       desc:'Head control, arm around neck, arch and squeeze.'},
-      {id:'n7', x:1632, y:371, type:'submission',  label:'Triangle choke',   desc:'Angle off, figure-four legs, squeeze.'},
-      {id:'n8', x:2052, y:371, type:'submission',  label:'Omoplata',         desc:'Hip escape, leg over shoulder, rotate.'},
-      {id:'n9', x:1422,  y:546, type:'transition',  label:'Back take',        desc:'Opponent postures — go to back.'},
-      {id:'n10',x:2472, y:546, type:'position',    label:'Mount',            desc:'Opponent bridges — transition to mount.'},
-      {id:'n11',x:2262, y:546, type:'submission',  label:'Armbar',           desc:'Break posture, step over head, extend.'},
-      {id:'n12',x:2682, y:546, type:'escape',      label:'Guard retention',  desc:'Opponent stands — control ankles, reguard.'},
+      {id:'n1', x:350, y:30,  type:'position',   label:'Closed guard',     desc:'Break posture, control sleeves and collar.'},
+      {id:'n2', x:30,  y:280, type:'sweep',       label:'Hip bump sweep',   desc:'Sit up, post hand, drive hip into opponent.'},
+      {id:'n3', x:330, y:280, type:'sweep',       label:'Scissor sweep',    desc:'Knee across belly, foot on hip, pull and push.'},
+      {id:'n4', x:630, y:280, type:'sweep',       label:'Pendulum sweep',   desc:'Overhook arm, foot on hip, pendulum leg.'},
+      {id:'n5', x:30,  y:530, type:'submission',  label:'Kimura',           desc:'Trap wrist, figure-four grip, rotate shoulder.'},
+      {id:'n6', x:250, y:530, type:'submission',  label:'Guillotine',       desc:'Head control, arm around neck, arch and squeeze.'},
+      {id:'n7', x:470, y:530, type:'submission',  label:'Triangle choke',   desc:'Angle off, figure-four legs, squeeze.'},
+      {id:'n8', x:690, y:530, type:'submission',  label:'Omoplata',         desc:'Hip escape, leg over shoulder, rotate.'},
+      {id:'n9', x:30,  y:780, type:'transition',  label:'Back take',        desc:'Opponent postures — go to back.'},
+      {id:'n10',x:250, y:780, type:'position',    label:'Mount',            desc:'Opponent bridges — transition to mount.'},
+      {id:'n11',x:470, y:780, type:'submission',  label:'Armbar',           desc:'Break posture, step over head, extend.'},
+      {id:'n12',x:690, y:780, type:'escape',      label:'Guard retention',  desc:'Opponent stands — control ankles, reguard.'},
     ],
     arrows:[
       ['n1','n2'],['n1','n3'],['n1','n4'],
@@ -2904,95 +2907,95 @@ var TMPLS={
   complete:{title:'The Whole Damn System',
     nodes:[
       // ── STANDING ──
-      {id:'n1',  x:1100, y:52,   type:'position',   label:'Standing',            desc:'Fight for grips, level changes, collar ties.'},
+      {id:'n1',  x:2000, y:80,   type:'position',   label:'Standing',            desc:'Fight for grips, level changes, collar ties.'},
 
       // ── TAKEDOWNS ──
-      {id:'n2',  x:275,  y:221,  type:'takedown',   label:'Double leg',          desc:'Level change, penetration step, drive through.'},
-      {id:'n3',  x:462,  y:182,  type:'takedown',   label:'Single leg',          desc:'Scoop ankle, elevate and dump, or run the pipe.'},
-      {id:'n4',  x:649, y:214,  type:'takedown',   label:'Ankle pick',          desc:'Collar tie, snap head down, step in and pick.'},
-      {id:'n5',  x:880, y:182,  type:'takedown',   label:'Osoto gari',          desc:'Collar and sleeve, off-balance, reap outside leg.'},
-      {id:'n6',  x:1100, y:221,  type:'takedown',   label:'Seoi nage',           desc:'Grip, load on back, throw forward.'},
-      {id:'n7',  x:1386, y:169,  type:'transition',  label:'Guard pull',          desc:'Sit to guard, feet on hips, control sleeves.'},
+      {id:'n2',  x:500,  y:340,  type:'takedown',   label:'Double leg',          desc:'Level change, penetration step, drive through.'},
+      {id:'n3',  x:840,  y:280,  type:'takedown',   label:'Single leg',          desc:'Scoop ankle, elevate and dump, or run the pipe.'},
+      {id:'n4',  x:1180, y:330,  type:'takedown',   label:'Ankle pick',          desc:'Collar tie, snap head down, step in and pick.'},
+      {id:'n5',  x:1600, y:280,  type:'takedown',   label:'Osoto gari',          desc:'Collar and sleeve, off-balance, reap outside leg.'},
+      {id:'n6',  x:2000, y:340,  type:'takedown',   label:'Seoi nage',           desc:'Grip, load on back, throw forward.'},
+      {id:'n7',  x:2520, y:260,  type:'transition',  label:'Guard pull',          desc:'Sit to guard, feet on hips, control sleeves.'},
 
       // ── GUARD PASSES (top right — attacker's options) ──
-      {id:'n29', x:1683, y:182,  type:'pass',       label:'Knee cut pass',       desc:'Slice knee through, flatten, drive to side control.'},
-      {id:'n30', x:1893, y:182,  type:'pass',       label:'Leg drag pass',       desc:'Drag far leg across, shoulder pressure, pass.'},
+      {id:'n29', x:3060, y:280,  type:'pass',       label:'Knee cut pass',       desc:'Slice knee through, flatten, drive to side control.'},
+      {id:'n30', x:3380, y:280,  type:'pass',       label:'Leg drag pass',       desc:'Drag far leg across, shoulder pressure, pass.'},
 
       // ── GUARD POSITIONS ──
-      {id:'n8',  x:66,  y:416,  type:'position',   label:'Closed guard',        desc:'Lock ankles, break posture, pull to chest.'},
-      {id:'n9',  x:363,  y:396,  type:'position',   label:'Half guard',           desc:'Control far knee, fight for underhook.'},
-      {id:'n10', x:671, y:422,  type:'position',   label:'Butterfly guard',     desc:'Hooks under thighs, grip fight, elevate.'},
-      {id:'n11', x:968, y:396,  type:'position',   label:'De La Riva',          desc:'DLR hook, sleeve and ankle control.'},
-      {id:'n12', x:1265, y:422,  type:'position',   label:'X-guard',             desc:'Under both legs, elevate hips, attack.'},
-      {id:'n13', x:1573, y:390,  type:'position',   label:'Back control',        desc:'Seat belt, hooks in, hips glued.'},
+      {id:'n8',  x:120,  y:640,  type:'position',   label:'Closed guard',        desc:'Lock ankles, break posture, pull to chest.'},
+      {id:'n9',  x:660,  y:610,  type:'position',   label:'Half guard',           desc:'Control far knee, fight for underhook.'},
+      {id:'n10', x:1220, y:650,  type:'position',   label:'Butterfly guard',     desc:'Hooks under thighs, grip fight, elevate.'},
+      {id:'n11', x:1760, y:610,  type:'position',   label:'De La Riva',          desc:'DLR hook, sleeve and ankle control.'},
+      {id:'n12', x:2300, y:650,  type:'position',   label:'X-guard',             desc:'Under both legs, elevate hips, attack.'},
+      {id:'n13', x:2860, y:600,  type:'position',   label:'Back control',        desc:'Seat belt, hooks in, hips glued.'},
 
       // ── CLOSED GUARD ATTACKS ──
-      {id:'n14', x:-88, y:598,  type:'sweep',      label:'Hip bump sweep',      desc:'Sit up, post hand, drive hip explosively.'},
-      {id:'n15', x:122,  y:598,  type:'sweep',      label:'Scissor sweep',       desc:'Knee across belly, foot on hip, pull and push.'},
-      {id:'n16', x:-110, y:754, type:'submission', label:'Kimura',              desc:'Trap wrist, figure-four grip, rotate shoulder.'},
-      {id:'n17', x:100,  y:767, type:'submission', label:'Guillotine',          desc:'Head control, arm around neck, arch and squeeze.'},
-      {id:'n18', x:-55, y:930, type:'submission', label:'Triangle choke',      desc:'Angle off, figure-four legs, pull head, squeeze.'},
-      {id:'n19', x:155,  y:930, type:'submission', label:'Omoplata',            desc:'Hip escape, leg over shoulder, sit up and rotate.'},
-      {id:'n20', x:-110, y:1092, type:'submission', label:'Armbar',              desc:'Break posture, step over head, extend hips.'},
+      {id:'n14', x:-160, y:920,  type:'sweep',      label:'Hip bump sweep',      desc:'Sit up, post hand, drive hip explosively.'},
+      {id:'n15', x:180,  y:920,  type:'sweep',      label:'Scissor sweep',       desc:'Knee across belly, foot on hip, pull and push.'},
+      {id:'n16', x:-200, y:1160, type:'submission', label:'Kimura',              desc:'Trap wrist, figure-four grip, rotate shoulder.'},
+      {id:'n17', x:120,  y:1180, type:'submission', label:'Guillotine',          desc:'Head control, arm around neck, arch and squeeze.'},
+      {id:'n18', x:-100, y:1430, type:'submission', label:'Triangle choke',      desc:'Angle off, figure-four legs, pull head, squeeze.'},
+      {id:'n19', x:200,  y:1430, type:'submission', label:'Omoplata',            desc:'Hip escape, leg over shoulder, sit up and rotate.'},
+      {id:'n20', x:-200, y:1680, type:'submission', label:'Armbar',              desc:'Break posture, step over head, extend hips.'},
 
       // ── HALF GUARD ATTACKS ──
-      {id:'n21', x:332,  y:598,  type:'sweep',      label:'Old school sweep',    desc:'Grab back of knee, sit up, shrimp out.'},
-      {id:'n22', x:542,  y:585,  type:'position',   label:'Deep half guard',     desc:'Dive under, grab far leg, elevate and roll.'},
-      {id:'n23', x:310,  y:767, type:'sweep',      label:'Deep half sweep',     desc:'Roll under opponent, come up on top.'},
-      {id:'n24', x:520,  y:754, type:'submission', label:'Kimura trap',         desc:'Trap wrist in kimura, threaten from guard.'},
+      {id:'n21', x:560,  y:920,  type:'sweep',      label:'Old school sweep',    desc:'Grab back of knee, sit up, shrimp out.'},
+      {id:'n22', x:900,  y:900,  type:'position',   label:'Deep half guard',     desc:'Dive under, grab far leg, elevate and roll.'},
+      {id:'n23', x:560,  y:1180, type:'sweep',      label:'Deep half sweep',     desc:'Roll under opponent, come up on top.'},
+      {id:'n24', x:900,  y:1160, type:'submission', label:'Kimura trap',         desc:'Trap wrist in kimura, threaten from guard.'},
 
       // ── BUTTERFLY ATTACKS ──
-      {id:'n25', x:752, y:598,  type:'sweep',      label:'Butterfly sweep',     desc:'Hook elevate, off-balance sideways, come on top.'},
-      {id:'n26', x:730, y:767, type:'transition',  label:'Arm drag to back',   desc:'Arm drag, step around outside, take back.'},
+      {id:'n25', x:1220, y:920,  type:'sweep',      label:'Butterfly sweep',     desc:'Hook elevate, off-balance sideways, come on top.'},
+      {id:'n26', x:1220, y:1180, type:'transition',  label:'Arm drag to back',   desc:'Arm drag, step around outside, take back.'},
 
       // ── DE LA RIVA ATTACKS ──
-      {id:'n28', x:968, y:572,  type:'pass',       label:'Torreando pass',      desc:'Control ankles, bullfight legs aside, pass.'},
-      {id:'n27', x:968, y:741, type:'sweep',      label:'DLR sweep',           desc:'Off-balance forward over the hook, come on top.'},
+      {id:'n28', x:1760, y:880,  type:'pass',       label:'Torreando pass',      desc:'Control ankles, bullfight legs aside, pass.'},
+      {id:'n27', x:1760, y:1140, type:'sweep',      label:'DLR sweep',           desc:'Off-balance forward over the hook, come on top.'},
 
       // ── X-GUARD ATTACKS ──
-      {id:'n31', x:1265, y:598,  type:'sweep',      label:'X-guard sweep',       desc:'Extend both legs to off-balance and sweep.'},
-      {id:'n32', x:1475, y:611,  type:'position',   label:'Single leg X',        desc:'Shin across hip, outside hook on ankle.'},
+      {id:'n31', x:2300, y:920,  type:'sweep',      label:'X-guard sweep',       desc:'Extend both legs to off-balance and sweep.'},
+      {id:'n32', x:2620, y:940,  type:'position',   label:'Single leg X',        desc:'Shin across hip, outside hook on ankle.'},
 
       // ── LEG LOCKS ──
-      {id:'n33', x:1617, y:715, type:'position',   label:'Ashi garami',         desc:'Single leg entanglement — inside heel hook position.'},
-      {id:'n37', x:1441, y:800, type:'submission', label:'Kneebar',             desc:'Patella over forearm, hips drive through knee.'},
-      {id:'n36', x:1441, y:968, type:'submission', label:'Straight ankle lock', desc:'Blade of wrist on Achilles, arch back and rotate.'},
-      {id:'n34', x:1617, y:884, type:'submission', label:'Inside heel hook',    desc:'Cup heel, elbow rotates down, hip drives in.'},
-      {id:'n35', x:1827, y:884, type:'submission', label:'Outside heel hook',   desc:'Far heel, rotate knee inward, body weight down.'},
+      {id:'n33', x:2940, y:1100, type:'position',   label:'Ashi garami',         desc:'Single leg entanglement — inside heel hook position.'},
+      {id:'n37', x:2620, y:1230, type:'submission', label:'Kneebar',             desc:'Patella over forearm, hips drive through knee.'},
+      {id:'n36', x:2620, y:1490, type:'submission', label:'Straight ankle lock', desc:'Blade of wrist on Achilles, arch back and rotate.'},
+      {id:'n34', x:2940, y:1360, type:'submission', label:'Inside heel hook',    desc:'Cup heel, elbow rotates down, hip drives in.'},
+      {id:'n35', x:3260, y:1360, type:'submission', label:'Outside heel hook',   desc:'Far heel, rotate knee inward, body weight down.'},
 
       // ── BACK CONTROL ATTACKS ──
-      {id:'n38', x:1760, y:533,  type:'submission', label:'Rear naked choke',    desc:'Slide under chin, figure-four, squeeze and extend.'},
-      {id:'n39', x:1970, y:533,  type:'submission', label:'Bow and arrow',       desc:'Deep collar grip, pull far knee, extend body.'},
-      {id:'n40', x:1925, y:377,  type:'submission', label:'Armbar from back',    desc:'Isolate arm, step leg over head, extend hips.'},
+      {id:'n38', x:3200, y:820,  type:'submission', label:'Rear naked choke',    desc:'Slide under chin, figure-four, squeeze and extend.'},
+      {id:'n39', x:3500, y:820,  type:'submission', label:'Bow and arrow',       desc:'Deep collar grip, pull far knee, extend body.'},
+      {id:'n40', x:3500, y:580,  type:'submission', label:'Armbar from back',    desc:'Isolate arm, step leg over head, extend hips.'},
 
       // ── TOP POSITIONS ──
-      {id:'n41', x:363,  y:1053, type:'position',   label:'Side control',        desc:'Heavy cross-face, hip pressure, control near arm.'},
-      {id:'n42', x:573, y:1027, type:'position',   label:'Knee on belly',       desc:'Knee on stomach, collar and hip control.'},
-      {id:'n43', x:759, y:1066, type:'position',   label:'North-south',         desc:'Walk around head, chest-to-chest, control arms.'},
-      {id:'n44', x:957, y:1040, type:'position',   label:'Mount',               desc:'High mount or S-mount, attack arms and neck.'},
-      {id:'n45', x:1167, y:1034, type:'position',   label:'Back mount',          desc:'Both hooks, seat belt, hunt the choke.'},
+      {id:'n41', x:660,  y:1620, type:'position',   label:'Side control',        desc:'Heavy cross-face, hip pressure, control near arm.'},
+      {id:'n42', x:1020, y:1580, type:'position',   label:'Knee on belly',       desc:'Knee on stomach, collar and hip control.'},
+      {id:'n43', x:1380, y:1640, type:'position',   label:'North-south',         desc:'Walk around head, chest-to-chest, control arms.'},
+      {id:'n44', x:1740, y:1600, type:'position',   label:'Mount',               desc:'High mount or S-mount, attack arms and neck.'},
+      {id:'n45', x:2100, y:1590, type:'position',   label:'Back mount',          desc:'Both hooks, seat belt, hunt the choke.'},
 
       // ── SIDE CONTROL SUBMISSIONS ──
-      {id:'n46', x:198,  y:1216, type:'submission', label:'Americana',           desc:'Paintbrush wrist, figure-four, rotate shoulder out.'},
-      {id:'n47', x:408,  y:1228, type:'submission', label:'Kimura (top)',        desc:'Figure-four, step over, rotate behind back.'},
+      {id:'n46', x:360,  y:1870, type:'submission', label:'Americana',           desc:'Paintbrush wrist, figure-four, rotate shoulder out.'},
+      {id:'n47', x:680,  y:1890, type:'submission', label:'Kimura (top)',        desc:'Figure-four, step over, rotate behind back.'},
 
       // ── NORTH-SOUTH SUBMISSION ──
-      {id:'n48', x:759, y:1228, type:'submission', label:'North-south choke',   desc:'Arm under neck, clasp, drop chest weight.'},
+      {id:'n48', x:1380, y:1890, type:'submission', label:'North-south choke',   desc:'Arm under neck, clasp, drop chest weight.'},
 
       // ── MOUNT SUBMISSIONS ──
-      {id:'n49', x:836, y:1384, type:'submission', label:'Cross collar choke',  desc:'Four fingers deep, second hand over, drive down.'},
-      {id:'n50', x:1046, y:1372, type:'submission', label:'Ezekiel choke',       desc:'Sleeve grip over neck, fist into throat, squeeze.'},
-      {id:'n51', x:836, y:1554, type:'submission', label:'Armbar (mount)',      desc:'Step leg over head, isolate, extend hips.'},
-      {id:'n52', x:1046, y:1554, type:'submission', label:'Triangle (mount)',    desc:'Trap arm, swing leg over, lock and squeeze.'},
+      {id:'n49', x:1520, y:2130, type:'submission', label:'Cross collar choke',  desc:'Four fingers deep, second hand over, drive down.'},
+      {id:'n50', x:1840, y:2110, type:'submission', label:'Ezekiel choke',       desc:'Sleeve grip over neck, fist into throat, squeeze.'},
+      {id:'n51', x:1520, y:2390, type:'submission', label:'Armbar (mount)',      desc:'Step leg over head, isolate, extend hips.'},
+      {id:'n52', x:1840, y:2390, type:'submission', label:'Triangle (mount)',    desc:'Trap arm, swing leg over, lock and squeeze.'},
 
       // ── BACK MOUNT SUBMISSIONS ──
-      {id:'n53', x:1155, y:1216, type:'submission', label:'Rear naked choke',    desc:'Slide under chin, lock figure-four, squeeze.'},
-      {id:'n54', x:1365, y:1216, type:'submission', label:'Bow and arrow (top)', desc:'Deep collar grip, pull far knee, arch body.'},
+      {id:'n53', x:2100, y:1870, type:'submission', label:'Rear naked choke',    desc:'Slide under chin, lock figure-four, squeeze.'},
+      {id:'n54', x:2420, y:1870, type:'submission', label:'Bow and arrow (top)', desc:'Deep collar grip, pull far knee, arch body.'},
 
       // ── ESCAPES ──
-      {id:'n55', x:198,  y:1398, type:'escape',     label:'Bridge and roll',     desc:'Trap arm and ankle, bridge explosively, roll.'},
-      {id:'n56', x:374,  y:1436, type:'escape',     label:'Elbow-knee escape',   desc:'Frame with elbow and knee, shrimp, reguard.'},
-      {id:'n57', x:1331, y:1398, type:'escape',     label:'Back escape',         desc:'Chin tuck, shoulder roll forward, face opponent.'},
+      {id:'n55', x:360,  y:2150, type:'escape',     label:'Bridge and roll',     desc:'Trap arm and ankle, bridge explosively, roll.'},
+      {id:'n56', x:680,  y:2210, type:'escape',     label:'Elbow-knee escape',   desc:'Frame with elbow and knee, shrimp, reguard.'},
+      {id:'n57', x:2420, y:2150, type:'escape',     label:'Back escape',         desc:'Chin tuck, shoulder roll forward, face opponent.'},
     ],
     arrows:[
       // Standing → takedowns & guard pull
