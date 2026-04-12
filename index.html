@@ -561,6 +561,13 @@ function toggleMobMarquee(){
 }
 
 // ── DRAG HANDLE (mobile) ──
+function getMaxH(){
+  var HANDLE_H=40;
+  var scroll=document.getElementById('sb-scroll');
+  var contentH=scroll?(scroll.scrollHeight+HANDLE_H):0;
+  var capH=Math.min(window.innerHeight*0.75, window.innerHeight-120);
+  return Math.min(contentH||capH, capH);
+}
 (function(){
   var handle=document.getElementById('drag-handle');
   var sb=document.getElementById('sb');
@@ -571,14 +578,6 @@ function toggleMobMarquee(){
   var MAX_H=getMaxH();
 
   function getSbH(){ return sb.offsetHeight||HANDLE_H; }
-
-  function getMaxH(){
-    // Fit content, cap at 75vh, never more than leaves 120px for canvas
-    var scroll=document.getElementById('sb-scroll');
-    var contentH=scroll?(scroll.scrollHeight+HANDLE_H):0;
-    var capH=Math.min(window.innerHeight*0.75, window.innerHeight-120);
-    return Math.min(contentH||capH, capH);
-  }
 
   function snapSidebar(open){
     MAX_H=getMaxH();
@@ -3092,6 +3091,8 @@ function loadTmpl(name){
   var T=TMPLS[name]; if(!T) return;
   var hasContent=Object.keys(nodes).length>0;
   if(hasContent&&!confirm('Load "'+T.title+'"?\nThis will replace everything on the canvas.')){return;}
+  // Close mobile sidebar
+  if(window.innerWidth<=1024){var sb=document.getElementById('sb');if(sb){sb.style.transition='height .3s cubic-bezier(.4,0,.2,1)';sb.style.height='40px';sb.classList.remove('sb-open');}}
   clearAll();
   document.getElementById('ftitle').value=T.title;
   nid=Math.max.apply(null,[0].concat(T.nodes.map(function(n){return parseInt(n.id.slice(1));})));
