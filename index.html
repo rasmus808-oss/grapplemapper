@@ -172,6 +172,7 @@ button.zr-fit{display:none}
   #pdf-btn, button#group-btn, button#note-btn, .sep, .zr{display:none}
   /* Marquee btn visible */
   #mob-marquee-btn{display:flex}
+  #sb-howto{display:none}
   /* Fit icon btn: show on mobile */
   button.zr-fit{display:flex!important}
   /* Hide text fit in zr */
@@ -369,8 +370,7 @@ button.zr-fit{display:none}
           </select>
         </div>
       </div>
-      <div class="ss">
-        <div class="sl">How to use</div>
+      <div class="ss" id="sb-howto">
         <ul class="howto">
           <li><b>Click</b> node → arm it &nbsp;·&nbsp; <b>click another</b> → connect</li>
           <li><b>Double-click</b> node → edit &nbsp;·&nbsp; canvas → add node</li>
@@ -567,8 +567,13 @@ function toggleMobMarquee(){
   function snapSidebar(open){
     MAX_H=window.innerHeight*0.65;
     sb.style.transition='height .3s cubic-bezier(.4,0,.2,1)';
-    if(open){ sb.style.height=MAX_H+'px'; sb.classList.add('sb-open'); currentH=MAX_H; }
-    else { sb.style.height=HANDLE_H+'px'; sb.classList.remove('sb-open'); currentH=HANDLE_H; }
+    if(open){
+      sb.style.height=MAX_H+'px'; sb.classList.add('sb-open'); currentH=MAX_H;
+      // If a node is armed, switch straight to its edit panel
+      if(armed&&nodes[armed]){ selNode(armed); sb.classList.add('sb-editing'); }
+    } else {
+      sb.style.height=HANDLE_H+'px'; sb.classList.remove('sb-open'); currentH=HANDLE_H;
+    }
   }
 
   // Tap handle = toggle
