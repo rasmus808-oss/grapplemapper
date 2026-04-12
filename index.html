@@ -162,7 +162,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:1
 #mob-marquee-btn{display:none}
 /* fit icon btn hidden on desktop (shown in .zr instead) */
 button.zr-fit{display:none}
-.mob-marquee-active{background:rgba(107,70,193,.18)!important;border-color:var(--acc)!important;color:var(--acc)!important}
+.mob-marquee-active{background:rgba(167,139,250,.25)!important;border-color:#a78bfa!important;color:#a78bfa!important}
 
 /* ── MOBILE ── */
 @media(max-width:680px){
@@ -525,11 +525,11 @@ wrap.addEventListener('wheel',function(e){
   var r=wrap.getBoundingClientRect();
   var mx=e.clientX-r.left, my=e.clientY-r.top;
   var d=e.deltaY<0?1.1:.91;
-  var ns=Math.min(3,Math.max(.12,sc*d));
+  var ns=Math.min(3,Math.max(.04,sc*d));
   px=mx-(mx-px)*(ns/sc); py=my-(my-py)*(ns/sc);
   sc=ns; applyT();
 },{passive:false});
-function zBy(d){sc=Math.min(3,Math.max(.12,sc+d));applyT();}
+function zBy(d){sc=Math.min(3,Math.max(.04,sc+d));applyT();}
 
 // ── MOBILE SIDEBAR TOGGLE ──
 function toggleSidebar(){
@@ -649,7 +649,7 @@ function canvasWheel(e){
   var r=wrap.getBoundingClientRect();
   var mx=e.clientX-r.left, my=e.clientY-r.top;
   var d=e.deltaY<0?1.1:.91;
-  var ns=Math.min(3,Math.max(.12,sc*d));
+  var ns=Math.min(3,Math.max(.04,sc*d));
   px=mx-(mx-px)*(ns/sc); py=my-(my-py)*(ns/sc);
   sc=ns; applyT();
 }
@@ -741,11 +741,13 @@ function fitView(){
   }
   // Nothing selected — fit all nodes
   var ns=Object.values(nodes); if(!ns.length){sc=1;px=60;py=50;applyT();return;}
-  var minX=Math.min.apply(null,ns.map(function(n){return n.x;}))-40;
-  var minY=Math.min.apply(null,ns.map(function(n){return n.y;}))-40;
-  var maxX=Math.max.apply(null,ns.map(function(n){return n.x+(n.w||190);}))+40;
-  var maxY=Math.max.apply(null,ns.map(function(n){return n.y+(n.h||120);}))+40;
-  sc=Math.min(2,Math.max(.12,Math.min(r.width/(maxX-minX),r.height/(maxY-minY))));
+  ns.forEach(function(n){var el=document.getElementById(n.id);if(el){n.w=el.offsetWidth||n.w||190;n.h=el.offsetHeight||n.h||120;}});
+  var allPad=60;
+  var minX=Math.min.apply(null,ns.map(function(n){return n.x;}))-allPad;
+  var minY=Math.min.apply(null,ns.map(function(n){return n.y;}))-allPad;
+  var maxX=Math.max.apply(null,ns.map(function(n){return n.x+(n.w||190);}))+allPad;
+  var maxY=Math.max.apply(null,ns.map(function(n){return n.y+(n.h||120);}))+allPad;
+  sc=Math.min(2,Math.max(.04,Math.min(r.width/(maxX-minX),r.height/(maxY-minY))));
   px=(r.width-(maxX+minX)*sc)/2; py=(r.height-(maxY+minY)*sc)/2;
   applyT();
 }
@@ -2424,7 +2426,10 @@ function restoreMapState(state, skipConfirm){
     renderNode(nd.id);
   });
   setTimeout(function(){
-    state.nodes.forEach(function(nd){nodes[nd.id].h=document.getElementById(nd.id)?.offsetHeight||120;});
+    state.nodes.forEach(function(nd){
+      var el=document.getElementById(nd.id);
+      if(el){nodes[nd.id].w=el.offsetWidth||190; nodes[nd.id].h=el.offsetHeight||120;}
+    });
     state.arrows.forEach(function(a){addArrow(a.from,a.to,a.label||'');});
     redrawArrows(); fitView();
   },200);
@@ -2525,7 +2530,7 @@ function undo(){
     renderNode(nd.id);
   });
   setTimeout(function(){
-    snap.nodes.forEach(function(nd){nodes[nd.id].h=document.getElementById(nd.id)?.offsetHeight||120;});
+    snap.nodes.forEach(function(nd){var el=document.getElementById(nd.id);if(el){nodes[nd.id].w=el.offsetWidth||190;nodes[nd.id].h=el.offsetHeight||120;}});
     snap.arrows.forEach(function(a){addArrow(a.from,a.to,a.label||'');});
     redrawArrows(); fitView();
     _undoPaused=false;
@@ -3087,7 +3092,10 @@ function loadTmpl(name){
     renderNode(nd.id);
   });
   setTimeout(function(){
-    T.nodes.forEach(function(nd){nodes[nd.id].h=document.getElementById(nd.id).offsetHeight||120;});
+    T.nodes.forEach(function(nd){
+      var el=document.getElementById(nd.id);
+      if(el){nodes[nd.id].w=el.offsetWidth||190; nodes[nd.id].h=el.offsetHeight||120;}
+    });
     T.arrows.forEach(function(a){addArrow(a[0],a[1],a[2]||'');});
     // Render template groups if any
     if(T.groups){
@@ -3233,7 +3241,7 @@ function loadTmpl(name){
       var d=tdist(ts[0],ts[1]);
       var mx=(ts[0].clientX+ts[1].clientX)/2, my=(ts[0].clientY+ts[1].clientY)/2;
       var r=wrap.getBoundingClientRect();
-      var ns=Math.min(3,Math.max(.12,sc*(d/_pinchDist)));
+      var ns=Math.min(3,Math.max(.04,sc*(d/_pinchDist)));
       px=(mx-r.left)-((mx-r.left)-px)*(ns/sc);
       py=(my-r.top)-((my-r.top)-py)*(ns/sc);
       sc=ns; applyT(); _pinchDist=d; e.preventDefault(); return;
