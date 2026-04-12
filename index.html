@@ -1258,7 +1258,7 @@ function mkNodeEl(id){
   if(hasVideo){
     if(ytId){
       if(n.playing){
-        var ysrc='https://www.youtube-nocookie.com/embed/'+ytId+'?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&autoplay=1';
+        var ysrc='https://www.youtube.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1';
         media='<div class="nvframe" style="aspect-ratio:'+aspectStr+';width:calc(100% - 12px)">'
           +'<iframe id="ytf-'+id+'" src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
           +'<div class="scroll-shield" onwheel="canvasWheel(event)"></div>'
