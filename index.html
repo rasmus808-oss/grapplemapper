@@ -26,6 +26,10 @@
 }
 html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;font-size:13px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 #bar{position:fixed;top:0;left:0;right:0;height:50px;display:flex;align-items:center;gap:9px;padding:0 16px;background:var(--dark);border-bottom:1px solid var(--dbord);z-index:500}
+@media all and (display-mode: standalone){
+  #bar{padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top))}
+  #layout{top:calc(50px + env(safe-area-inset-top))}
+}
 .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;color:#fff;width:264px;flex-shrink:0;box-sizing:border-box}
 .logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6b46c1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
 .logo span{color:#c4b5f8}
@@ -182,6 +186,9 @@ button.zr-fit{display:none}
   .icon-btn{width:38px;height:38px}
   #layout{flex-direction:column}
   #wrap{position:fixed;top:50px;left:0;right:0;bottom:40px;touch-action:none}
+  @media all and (display-mode: standalone){
+    #wrap{top:calc(50px + env(safe-area-inset-top))}
+  }
   #sb{
     position:fixed;bottom:0;left:0;right:0;width:100%!important;
     height:40px;border-right:none;overflow:hidden;z-index:400;
