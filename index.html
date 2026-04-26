@@ -669,10 +669,11 @@ var _muted={};
 function subscribeYTFrame(iframe){
   iframe.addEventListener('load',function(){
     try{
-      iframe.contentWindow.postMessage(JSON.stringify({
-        event:'listening',
-        id:iframe.id
-      }),'*');
+      iframe.contentWindow.postMessage(JSON.stringify({event:'listening',id:iframe.id}),'*');
+      // Send playVideo after a short delay — needed on iOS where autoplay is blocked
+      setTimeout(function(){
+        try{iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}),'*');}catch(ex){}
+      },300);
     }catch(ex){}
   });
 }
@@ -1282,15 +1283,12 @@ function mkNodeEl(id){
       if(n.playing){
         var ysrc='https://www.youtube.com/embed/'+ytId+'?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1';
         media='<div class="nvframe" style="aspect-ratio:'+aspectStr+';width:calc(100% - 12px)">'
-          +'<iframe id="ytf-'+id+'" src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+          +'<iframe id="ytf-'+id+'" src="'+ysrc+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;fullscreen" allowfullscreen webkit-playsinline playsinline></iframe>'
           +'<div class="scroll-shield" onwheel="canvasWheel(event)"></div>'
           +'<div class="nvmute" id="mute-'+id+'" title="Mute / Unmute" onclick="toggleMute(\''+id+'\');event.stopPropagation()">'
           +'<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'
           +'</div>'
           +'<div class="nvstop" title="Stop">&#x25A0;</div>'
-          +'<div class="nvopen" title="Fullscreen" onclick="enterFullscreen(\'ytf-'+id+'\');event.stopPropagation()">'
-          +'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
-          +'</div>'
           +'</div>';
       } else {
         media='<div class="nvthumb" style="background-image:url(\'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg\');aspect-ratio:'+aspectStr+'"><div class="nvplay"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div></div>';
